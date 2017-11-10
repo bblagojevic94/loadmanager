@@ -1,3 +1,5 @@
+import Dependencies._
+
 lazy val buildSettings = Seq(
   organization := "io.mainflux",
   name := "loadmanager",
@@ -5,14 +7,13 @@ lazy val buildSettings = Seq(
   scalaVersion := "2.11.11"
 )
 
+lazy val dbLibs = Seq(postgres, slick, slickEvolutions)
+
+lazy val utils = Seq(webJarsPlay, swagger, jodaTime)
+
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
   .settings(buildSettings: _*)
   .settings(
-    libraryDependencies ++= Seq(
-      ws,
-      "org.webjars"            %% "webjars-play"       % "2.6.1",
-      "org.webjars"            % "swagger-ui"          % "3.2.2",
-      "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % Test
-    )
+    libraryDependencies ++= (dbLibs ++ utils :+ ws :+ scalaTest)
   )
