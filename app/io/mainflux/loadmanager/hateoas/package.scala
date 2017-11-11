@@ -11,5 +11,5 @@ package object hateoas {
   case class Meta(createdAt: String = DateTime.now().toString)
 
   val GroupType     = "groups"
-  val MicroGridType = "microgrids"
+  val MicrogridType = "microgrids"
 }

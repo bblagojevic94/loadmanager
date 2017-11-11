@@ -12,6 +12,7 @@ object Dependencies {
   val webJarsPlay: ModuleID = "org.webjars" %% "webjars-play" % "2.6.1"
   val swagger: ModuleID     = "org.webjars" % "swagger-ui"    % "3.2.2"
 
-  val scalaTest: ModuleID = "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % Test
+  val scalaTest: ModuleID = "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0"   % Test
+  val mockito: ModuleID   = "org.mockito"            % "mockito-all"         % "1.10.19" % Test
 
 }

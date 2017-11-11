@@ -19,6 +19,8 @@ object JsonFormat {
   implicit val groupAttributes: OFormat[GroupAttributes] = Json.format[GroupAttributes]
   implicit val groupData: OFormat[GroupData]             = Json.format[GroupData]
   implicit val groupRequest: OFormat[GroupRequest]       = Json.format[GroupRequest]
+  implicit val microgridsRelationships: OFormat[MicrogridsRelationships] =
+    Json.format[MicrogridsRelationships]
   implicit val groupRelationshipsResponse: OFormat[GroupRelationshipsResponse] =
     Json.format[GroupRelationshipsResponse]
   implicit val groupResponseData: OFormat[GroupResponseData] = Json.format[GroupResponseData]

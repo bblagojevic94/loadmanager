@@ -23,24 +23,30 @@ object GroupResponse {
 case class GroupResponseData(`type`: String,
                              id: Long,
                              attributes: GroupAttributes,
-                             relationships: GroupRelationshipsResponse)
+                             relationships: GroupRelationshipsResponse,
+                             links: Links)
 
 object GroupResponseData {
   def fromDomain(group: Group): GroupResponseData = {
     val relationships =
       GroupRelationshipsResponse(
-        Links(s"/$GroupType/${group.id.get}"),
-        MicroGridIdentifierCollection(group.grids.map(mg => MicroGridIdentifier(MicroGridType, mg.id.get)))
+        MicrogridsRelationships(
+          Links(s"/$GroupType/${group.id.get}/relationships/$MicrogridType"),
+          group.grids.map(mg => MicroGridIdentifier(MicrogridType, mg.id.get))
+        )
       )
     GroupResponseData(
       GroupType,
       group.id.get,
       GroupAttributes(name = group.name),
-      relationships
+      relationships,
+      Links(s"/$GroupType/${group.id.get}")
     )
   }
 }
 
-case class GroupRelationshipsResponse(links: Links, microgrids: MicroGridIdentifierCollection)
+case class GroupRelationshipsResponse(microgrids: MicrogridsRelationships)
+
+case class MicrogridsRelationships(links: Links, data: Seq[MicroGridIdentifier])
 
 case class Links(self: String)

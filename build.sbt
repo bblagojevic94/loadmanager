@@ -11,9 +11,11 @@ lazy val dbLibs = Seq(postgres, slick, slickEvolutions)
 
 lazy val utils = Seq(webJarsPlay, swagger, jodaTime)
 
+lazy val testLibs = Seq(scalaTest, mockito)
+
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
   .settings(buildSettings: _*)
   .settings(
-    libraryDependencies ++= (dbLibs ++ utils :+ ws :+ scalaTest)
+    libraryDependencies ++= (dbLibs ++ utils ++ testLibs :+ ws)
   )
