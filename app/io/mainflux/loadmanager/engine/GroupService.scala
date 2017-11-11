@@ -1,12 +1,10 @@
-package io.mainflux.loadmanager.engine.service
+package io.mainflux.loadmanager.engine
 
-import javax.inject.Inject
-
-import io.mainflux.loadmanager.engine.model.Group
-import io.mainflux.loadmanager.engine.persistence.{GroupRepository, MicrogridRepository}
+import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class GroupService @Inject()(groupRepository: GroupRepository, microgridRepository: MicrogridRepository)(
     implicit ec: ExecutionContext
 ) {

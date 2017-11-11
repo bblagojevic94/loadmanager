@@ -2,7 +2,7 @@ package io.mainflux.loadmanager.controllers
 
 import javax.inject.Inject
 
-import io.mainflux.loadmanager.engine.service.GroupService
+import io.mainflux.loadmanager.engine.GroupService
 import io.mainflux.loadmanager.hateoas.{GroupRequest, GroupResponse}
 import play.api.data.validation.ValidationError
 import play.api.libs.json.{JsPath, JsValue, Json}

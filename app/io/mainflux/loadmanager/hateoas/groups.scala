@@ -1,17 +1,19 @@
 package io.mainflux.loadmanager.hateoas
 
-import io.mainflux.loadmanager.engine.model.Group
+import java.time.LocalDateTime
+
+import io.mainflux.loadmanager.engine.Group
 
 case class GroupRequest(data: GroupData)
 
 case class GroupData(`type`: String, attributes: GroupAttributes, relationships: GroupRelationshipsRequest) {
   def toDomain: (Group, Seq[Long]) =
-    (Group(name = attributes.name), relationships.microgrids.data.map(_.id))
+    (Group(name = attributes.name, createdAt = LocalDateTime.now()), relationships.microgrids.data.map(_.id))
 }
 
 case class GroupAttributes(name: String)
 
-case class GroupRelationshipsRequest(microgrids: MicroGridIdentifierCollection)
+case class GroupRelationshipsRequest(microgrids: MicrogridIdentifiers)
 
 case class GroupResponse(data: GroupResponseData)
 
@@ -32,7 +34,7 @@ object GroupResponseData {
       GroupRelationshipsResponse(
         MicrogridsRelationships(
           Links(s"/$GroupType/${group.id.get}/relationships/$MicrogridType"),
-          group.grids.map(mg => MicroGridIdentifier(MicrogridType, mg.id.get))
+          group.grids.map(mg => MicrogridIdentifier(MicrogridType, mg.id.get))
         )
       )
     GroupResponseData(
@@ -47,6 +49,6 @@ object GroupResponseData {
 
 case class GroupRelationshipsResponse(microgrids: MicrogridsRelationships)
 
-case class MicrogridsRelationships(links: Links, data: Seq[MicroGridIdentifier])
+case class MicrogridsRelationships(links: Links, data: Seq[MicrogridIdentifier])
 
 case class Links(self: String)

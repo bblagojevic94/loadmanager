@@ -1,7 +1,7 @@
 package io.mainflux.loadmanager.engine.service
 
-import io.mainflux.loadmanager.engine.model.{Group, Microgrid, Platform}
-import io.mainflux.loadmanager.engine.persistence.{GroupRepository, MicrogridRepository}
+import io.mainflux.loadmanager.engine.Platform._
+import io.mainflux.loadmanager.engine._
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -58,9 +58,9 @@ class GroupServiceSpec extends WordSpecLike with MustMatchers with MockitoSugar 
     val service                                   = new GroupService(groupRepository, microgridsRepository)
 
     val microgrids = Seq(
-      Microgrid(Option(1), "test-url-1", Platform.OSGP, "org-1"),
-      Microgrid(Option(2), "test-url-2", Platform.MAINFLUX, "org-2"),
-      Microgrid(Option(3), "test-url-3", Platform.OSGP, "org-3")
+      Microgrid(Option(1), "test-url-1", OSGP, "org-1"),
+      Microgrid(Option(2), "test-url-2", MAINFLUX, "org-2"),
+      Microgrid(Option(3), "test-url-3", OSGP, "org-3")
     )
     val group = Group(Option(1), "test-name", microgrids)
 

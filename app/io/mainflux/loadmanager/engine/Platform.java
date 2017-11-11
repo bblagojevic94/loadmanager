@@ -1,4 +1,4 @@
-package io.mainflux.loadmanager.engine.model;
+package io.mainflux.loadmanager.engine;
 
 public enum Platform {
     OSGP,

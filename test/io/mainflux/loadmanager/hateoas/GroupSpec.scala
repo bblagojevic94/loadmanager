@@ -1,6 +1,6 @@
 package io.mainflux.loadmanager.hateoas
 
-import io.mainflux.loadmanager.engine.model.{Group, Microgrid, Platform}
+import io.mainflux.loadmanager.engine.{Group, Microgrid, Platform}
 import org.scalatest.{MustMatchers, WordSpecLike}
 
 class GroupSpec extends WordSpecLike with MustMatchers {
@@ -10,10 +10,10 @@ class GroupSpec extends WordSpecLike with MustMatchers {
       "create valid Group" in {
         val attributes = GroupAttributes(name = "test-name")
         val relationships = GroupRelationshipsRequest(
-          MicroGridIdentifierCollection(
-            Seq(MicroGridIdentifier(MicrogridType, 1),
-                MicroGridIdentifier(MicrogridType, 2),
-                MicroGridIdentifier(MicrogridType, 3))
+          MicrogridIdentifiers(
+            Seq(MicrogridIdentifier(MicrogridType, 1),
+                MicrogridIdentifier(MicrogridType, 2),
+                MicrogridIdentifier(MicrogridType, 3))
           )
         )
         val request = GroupRequest(GroupData(GroupType, attributes, relationships))
