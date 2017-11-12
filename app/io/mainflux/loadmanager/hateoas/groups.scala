@@ -4,25 +4,25 @@ import java.time.LocalDateTime
 
 import io.mainflux.loadmanager.engine.Group
 
-case class GroupRequest(data: GroupData)
+final case class GroupRequest(data: GroupData)
 
-case class GroupData(`type`: String, attributes: GroupAttributes, relationships: GroupRelationshipsRequest) {
+final case class GroupData(`type`: String, attributes: GroupAttributes, relationships: GroupRelationshipsRequest) {
   def toDomain: (Group, Seq[Long]) =
     (Group(name = attributes.name, createdAt = LocalDateTime.now()), relationships.microgrids.data.map(_.id))
 }
 
-case class GroupAttributes(name: String)
+final case class GroupAttributes(name: String)
 
-case class GroupRelationshipsRequest(microgrids: MicrogridIdentifiers)
+final case class GroupRelationshipsRequest(microgrids: MicrogridIdentifiers)
 
-case class GroupResponse(data: GroupResponseData)
+final case class GroupResponse(data: GroupResponseData)
 
 object GroupResponse {
   def fromDomain(group: Group) =
     GroupResponse(GroupResponseData.fromDomain(group))
 }
 
-case class GroupResponseData(`type`: String,
+final case class GroupResponseData(`type`: String,
                              id: Long,
                              attributes: GroupAttributes,
                              relationships: GroupRelationshipsResponse,
@@ -47,8 +47,8 @@ object GroupResponseData {
   }
 }
 
-case class GroupRelationshipsResponse(microgrids: MicrogridsRelationships)
+final case class GroupRelationshipsResponse(microgrids: MicrogridsRelationships)
 
-case class MicrogridsRelationships(links: Links, data: Seq[MicrogridIdentifier])
+final case class MicrogridsRelationships(links: Links, data: Seq[MicrogridIdentifier])
 
-case class Links(self: String)
+final case class Links(self: String)

@@ -2,7 +2,7 @@ package io.mainflux.loadmanager.engine
 
 import java.time.LocalDateTime
 
-case class Microgrid(id: Option[Long] = None,
+final case class Microgrid(id: Option[Long] = None,
                      url: String,
                      platform: Platform,
                      organisationId: String,

@@ -2,7 +2,7 @@ package io.mainflux.loadmanager.persistence
 
 import java.time.LocalDateTime
 
-import io.mainflux.loadmanager.engine.{Group, Microgrid, Platform}
+import io.mainflux.loadmanager.engine.{Group, GroupMicrogrid, Microgrid, Platform}
 import io.mainflux.loadmanager.persistence.DatabaseMapper._
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ProvenShape, TableQuery}
@@ -68,7 +68,5 @@ trait DatabaseSchema {
     def createdAt: Rep[LocalDateTime] = column[LocalDateTime]("created_at")
 
   }
-
-  case class GroupMicrogrid(groupId: Long, microgridId: Long, createdAt: LocalDateTime)
 
 }

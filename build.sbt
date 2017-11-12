@@ -7,15 +7,12 @@ lazy val buildSettings = Seq(
   scalaVersion := "2.11.11"
 )
 
-lazy val coreLibs = Seq(ws, scalaTest, mockito)
-
-lazy val dbLibs = Seq(postgres, slick, slickEvolutions)
-
-lazy val utils = Seq(webJarsPlay, swagger)
+lazy val coreLibs = Seq(ws, postgres, slick, slickEvolutions, webJarsPlay, swagger)
+lazy val testLibs = Seq(scalaTest, mockito).map(_ % Test)
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
   .settings(buildSettings: _*)
   .settings(
-    libraryDependencies ++= (coreLibs ++ dbLibs ++ utils)
+    libraryDependencies ++= (coreLibs ++ testLibs)
   )

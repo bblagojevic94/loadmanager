@@ -3,7 +3,7 @@ package io.mainflux.loadmanager.postgres
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-import io.mainflux.loadmanager.engine.{Group, GroupRepository}
+import io.mainflux.loadmanager.engine.{Group, GroupMicrogrid, GroupRepository}
 import io.mainflux.loadmanager.persistence.DatabaseSchema
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile

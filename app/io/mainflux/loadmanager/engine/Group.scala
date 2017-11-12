@@ -2,7 +2,7 @@ package io.mainflux.loadmanager.engine
 
 import java.time.LocalDateTime
 
-case class Group(id: Option[Long] = None,
+final case class Group(id: Option[Long] = None,
                  name: String,
                  grids: Seq[Grid] = Seq[Grid](),
                  createdAt: LocalDateTime = LocalDateTime.now())
