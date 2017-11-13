@@ -18,7 +18,7 @@ class GroupServiceSpec extends WordSpecLike with MustMatchers with MockitoSugar 
     "store new group" in new Fixture {
       val grids: Seq[Long] = microgrids.map(_.id.get)
       when(groupRepository.save(group)).thenReturn(Future.successful(group))
-      when(microgridsRepository.findAll(grids)).thenReturn(Future.successful(microgrids))
+      when(microgridsRepository.retrieveAll(grids)).thenReturn(Future.successful(microgrids))
 
       whenReady(service.createGroup(group, grids)) { result =>
         result.name must be(group.name)
@@ -31,7 +31,7 @@ class GroupServiceSpec extends WordSpecLike with MustMatchers with MockitoSugar 
       val withoutFirstMicrogrid: Seq[Microgrid] = microgrids.tail
 
       when(groupRepository.save(any(classOf[Group]))).thenReturn(Future.successful(group))
-      when(microgridsRepository.findAll(grids)).thenReturn(Future.successful(withoutFirstMicrogrid))
+      when(microgridsRepository.retrieveAll(grids)).thenReturn(Future.successful(withoutFirstMicrogrid))
 
       whenReady(service.createGroup(group, grids)) { result =>
         result.name must be(group.name)
@@ -44,10 +44,42 @@ class GroupServiceSpec extends WordSpecLike with MustMatchers with MockitoSugar 
       val grids: Seq[Long] = microgrids.map(_.id.get)
 
       when(groupRepository.save(group)).thenReturn(Future.successful(group))
-      when(microgridsRepository.findAll(grids)).thenReturn(Future.successful(Seq.empty))
+      when(microgridsRepository.retrieveAll(grids)).thenReturn(Future.successful(Seq.empty))
 
       an[IllegalArgumentException] must be thrownBy {
         Await.result(service.createGroup(group, grids), 1.second)
+      }
+    }
+
+    "retrieve one group" in new Fixture {
+      when(groupRepository.retrieveOne(group.id.get)).thenReturn(Future.successful(Option(group)))
+
+      whenReady(service.retrieveOne(group.id.get)) { result =>
+        result.name must be(group.name)
+      }
+    }
+
+    "reject to return one group when it does not exist" in new Fixture {
+      when(groupRepository.retrieveOne(group.id.get)).thenReturn(Future.successful(None))
+
+      an[EntityNotFound] must be thrownBy {
+        Await.result(service.retrieveOne(group.id.get), 1.second)
+      }
+    }
+
+    "remove one group" in new Fixture {
+      when(groupRepository.remove(group.id.get)).thenReturn(Future.successful(1))
+
+      noException must be thrownBy {
+        Await.result(service.remove(group.id.get), 1.second)
+      }
+    }
+
+    "reject to remove non existing group" in new Fixture {
+      when(groupRepository.remove(group.id.get)).thenReturn(Future.successful(0))
+
+      an[EntityNotFound] must be thrownBy {
+        Await.result(service.remove(group.id.get), 1.second)
       }
     }
   }

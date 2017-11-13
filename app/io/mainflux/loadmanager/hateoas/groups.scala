@@ -6,7 +6,9 @@ import io.mainflux.loadmanager.engine.Group
 
 final case class GroupRequest(data: GroupData)
 
-final case class GroupData(`type`: String, attributes: GroupAttributes, relationships: GroupRelationshipsRequest) {
+final case class GroupData(`type`: String,
+                           attributes: GroupAttributes,
+                           relationships: GroupRelationshipsRequest) {
   def toDomain: (Group, Seq[Long]) =
     (Group(name = attributes.name, createdAt = LocalDateTime.now()), relationships.microgrids.data.map(_.id))
 }
@@ -23,10 +25,10 @@ object GroupResponse {
 }
 
 final case class GroupResponseData(`type`: String,
-                             id: Long,
-                             attributes: GroupAttributes,
-                             relationships: GroupRelationshipsResponse,
-                             links: Links)
+                                   id: Long,
+                                   attributes: GroupAttributes,
+                                   relationships: GroupRelationshipsResponse,
+                                   links: Links)
 
 object GroupResponseData {
   def fromDomain(group: Group): GroupResponseData = {
@@ -52,3 +54,12 @@ final case class GroupRelationshipsResponse(microgrids: MicrogridsRelationships)
 final case class MicrogridsRelationships(links: Links, data: Seq[MicrogridIdentifier])
 
 final case class Links(self: String)
+
+final case class GroupCollectionResponse(data: Seq[GroupResponseData])
+
+object GroupCollectionResponse {
+  def fromDomain(groups: Seq[Group]): GroupCollectionResponse = {
+    val data: Seq[GroupResponseData] = groups.map(GroupResponseData.fromDomain)
+    GroupCollectionResponse(data)
+  }
+}

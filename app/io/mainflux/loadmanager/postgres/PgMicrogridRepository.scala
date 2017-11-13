@@ -15,7 +15,7 @@ class PgMicrogridRepository @Inject()(protected val dbConfigProvider: DatabaseCo
     with HasDatabaseConfigProvider[JdbcProfile]
     with DatabaseSchema {
 
-  def findAll(grids: Seq[Long]): Future[Seq[Microgrid]] =
+  def retrieveAll(grids: Seq[Long]): Future[Seq[Microgrid]] =
     db.run(microgrids.filter(_.id.inSet(grids)).result)
 
 }

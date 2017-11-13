@@ -3,7 +3,7 @@ package io.mainflux.loadmanager.controllers
 import javax.inject.Inject
 
 import io.mainflux.loadmanager.engine.GroupService
-import io.mainflux.loadmanager.hateoas.{GroupRequest, GroupResponse}
+import io.mainflux.loadmanager.hateoas.{GroupCollectionResponse, GroupRequest, GroupResponse}
 import play.api.data.validation.ValidationError
 import play.api.libs.json.{JsPath, JsValue, Json}
 import play.api.mvc._
@@ -26,6 +26,22 @@ class Groups @Inject()(groupService: GroupService)(implicit val ec: ExecutionCon
             .map(group => Created(Json.toJson(GroupResponse.fromDomain(group))))
         }
       )
+  }
+
+  def retrieveAll: Action[AnyContent] = Action.async {
+    groupService
+      .retrieveAll()
+      .map(groups => Ok(Json.toJson(GroupCollectionResponse.fromDomain(groups))))
+  }
+
+  def retrieveOne(id: Long): Action[AnyContent] = Action.async {
+    groupService
+      .retrieveOne(id)
+      .map(group => Ok(Json.toJson(GroupResponse.fromDomain(group))))
+  }
+
+  def remove(id: Long): Action[AnyContent] = Action.async {
+    groupService.remove(id).map(_ => NoContent)
   }
 
   private def createErrorResponse(errors: Seq[(JsPath, Seq[ValidationError])]) = {

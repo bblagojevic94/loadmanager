@@ -4,6 +4,6 @@ import scala.concurrent.Future
 
 trait MicrogridRepository {
 
-  def findAll(grids: Seq[Long]): Future[Seq[Microgrid]]
+  def retrieveAll(grids: Seq[Long]): Future[Seq[Microgrid]]
 
 }
