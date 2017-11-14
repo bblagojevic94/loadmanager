@@ -25,7 +25,7 @@ class ErrorHandler extends HttpErrorHandler {
       case _                           => InternalServerError(createResponse(500, exception.getMessage))
     }
 
-    Future.successful(response.as(JsonApiParser.JsonAPIContentType))
+    Future.successful(response.as(JsonApiParser.JsonApiContentType))
   }
 
   private def createResponse(code: Int, message: String) = {

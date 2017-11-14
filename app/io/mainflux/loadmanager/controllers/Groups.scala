@@ -25,7 +25,7 @@ class Groups @Inject()(groupService: GroupService)(implicit val ec: ExecutionCon
             .tupled(body.data.toDomain)
             .map(
               group =>
-                Created(Json.toJson(GroupResponse.fromDomain(group))).as(JsonApiParser.JsonAPIContentType)
+                Created(Json.toJson(GroupResponse.fromDomain(group))).as(JsonApiParser.JsonApiContentType)
             )
         }
       )
@@ -36,14 +36,14 @@ class Groups @Inject()(groupService: GroupService)(implicit val ec: ExecutionCon
       .retrieveAll()
       .map(
         groups =>
-          Ok(Json.toJson(GroupCollectionResponse.fromDomain(groups))).as(JsonApiParser.JsonAPIContentType)
+          Ok(Json.toJson(GroupCollectionResponse.fromDomain(groups))).as(JsonApiParser.JsonApiContentType)
       )
   }
 
   def retrieveOne(id: Long): Action[AnyContent] = Action.async {
     groupService
       .retrieveOne(id)
-      .map(group => Ok(Json.toJson(GroupResponse.fromDomain(group))).as(JsonApiParser.JsonAPIContentType))
+      .map(group => Ok(Json.toJson(GroupResponse.fromDomain(group))).as(JsonApiParser.JsonApiContentType))
   }
 
   def remove(id: Long): Action[AnyContent] = Action.async {

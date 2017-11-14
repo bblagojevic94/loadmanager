@@ -25,7 +25,7 @@ class Microgrids @Inject()(microgridService: MicrogridService)(implicit val ec: 
             .create(body.data.toDomain)
             .map(
               mg =>
-                Created(Json.toJson(MicrogridResponse.fromDomain(mg))).as(JsonApiParser.JsonAPIContentType)
+                Created(Json.toJson(MicrogridResponse.fromDomain(mg))).as(JsonApiParser.JsonApiContentType)
             )
         }
       )
@@ -33,18 +33,18 @@ class Microgrids @Inject()(microgridService: MicrogridService)(implicit val ec: 
 
   def retrieveOne(id: Long): Action[AnyContent] = Action.async {
     microgridService
-      .findOne(id)
+      .retrieveOne(id)
       .map(
         microgrid =>
-          Ok(Json.toJson(MicrogridResponse.fromDomain(microgrid))).as(JsonApiParser.JsonAPIContentType)
+          Ok(Json.toJson(MicrogridResponse.fromDomain(microgrid))).as(JsonApiParser.JsonApiContentType)
       )
   }
 
   def retrieveAll: Action[AnyContent] = Action.async {
-    microgridService.findAll.map(
+    microgridService.retrieveAll.map(
       microgrids =>
         Ok(Json.toJson(MicrogridCollectionResponse.fromDomain(microgrids)))
-          .as(JsonApiParser.JsonAPIContentType)
+          .as(JsonApiParser.JsonApiContentType)
     )
   }
 }

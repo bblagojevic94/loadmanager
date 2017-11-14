@@ -9,7 +9,7 @@ import scala.concurrent.Future
 
 object JsonApiParser extends BodyParsers {
 
-  val JsonAPIContentType: String = "application/vnd.api+json"
+  val JsonApiContentType: String = "application/vnd.api+json"
 
   private def createBadResult(msg: String, statusCode: Int = BAD_REQUEST): RequestHeader => Future[Result] = {
     request =>
@@ -18,8 +18,8 @@ object JsonApiParser extends BodyParsers {
 
   def json: BodyParser[JsValue] =
     parse.when(
-      _.contentType.exists(m => m.equals(JsonAPIContentType)),
+      _.contentType.exists(m => m.equals(JsonApiContentType)),
       parse.tolerantJson(parse.DefaultMaxTextLength),
-      createBadResult(s"Expecting $JsonAPIContentType", UNSUPPORTED_MEDIA_TYPE)
+      createBadResult(s"Expecting $JsonApiContentType", UNSUPPORTED_MEDIA_TYPE)
     )
 }
