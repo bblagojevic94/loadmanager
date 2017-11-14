@@ -20,7 +20,7 @@ class GroupServiceSpec extends WordSpecLike with MustMatchers with MockitoSugar 
       when(groupRepository.save(group)).thenReturn(Future.successful(group))
       when(microgridsRepository.retrieveAll(grids)).thenReturn(Future.successful(microgrids))
 
-      whenReady(service.createGroup(group, grids)) { result =>
+      whenReady(service.create(group, grids)) { result =>
         result.name must be(group.name)
         (result.grids.map(_.id.get) must contain).allElementsOf(grids)
       }
@@ -33,7 +33,7 @@ class GroupServiceSpec extends WordSpecLike with MustMatchers with MockitoSugar 
       when(groupRepository.save(any(classOf[Group]))).thenReturn(Future.successful(group))
       when(microgridsRepository.retrieveAll(grids)).thenReturn(Future.successful(withoutFirstMicrogrid))
 
-      whenReady(service.createGroup(group, grids)) { result =>
+      whenReady(service.create(group, grids)) { result =>
         result.name must be(group.name)
         (result.grids.map(_.id.get) must contain)
           .allElementsOf(withoutFirstMicrogrid.map(_.id.get))
@@ -47,7 +47,7 @@ class GroupServiceSpec extends WordSpecLike with MustMatchers with MockitoSugar 
       when(microgridsRepository.retrieveAll(grids)).thenReturn(Future.successful(Seq.empty))
 
       an[IllegalArgumentException] must be thrownBy {
-        Await.result(service.createGroup(group, grids), 1.second)
+        Await.result(service.create(group, grids), 1.second)
       }
     }
 

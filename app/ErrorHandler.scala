@@ -1,5 +1,6 @@
 import javax.inject.Singleton
 
+import io.mainflux.loadmanager.controllers.JsonApiParser
 import io.mainflux.loadmanager.engine.EntityNotFound
 import io.mainflux.loadmanager.hateoas.{Error, ErrorResponse}
 import play.api.http.HttpErrorHandler
@@ -24,7 +25,7 @@ class ErrorHandler extends HttpErrorHandler {
       case _                           => InternalServerError(createResponse(500, exception.getMessage))
     }
 
-    Future.successful(response)
+    Future.successful(response.as(JsonApiParser.JsonAPIContentType))
   }
 
   private def createResponse(code: Int, message: String) = {

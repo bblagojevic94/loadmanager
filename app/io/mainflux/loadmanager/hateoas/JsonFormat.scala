@@ -9,8 +9,15 @@ object JsonFormat {
   implicit val error: OFormat[Error]            = Json.format[Error]
   implicit val errorRes: OFormat[ErrorResponse] = Json.format[ErrorResponse]
 
-  implicit val microgridId: OFormat[MicrogridIdentifier]   = Json.format[MicrogridIdentifier]
-  implicit val microgridIds: OFormat[MicrogridIdentifiers] = Json.format[MicrogridIdentifiers]
+  implicit val microgridId: OFormat[MicrogridIdentifier]        = Json.format[MicrogridIdentifier]
+  implicit val microgridIdColl: OFormat[MicrogridIdentifiers]   = Json.format[MicrogridIdentifiers]
+  implicit val microgridAttrs: OFormat[MicrogridAttributes]     = Json.format[MicrogridAttributes]
+  implicit val microgridReqData: OFormat[MicrogridRequestData]  = Json.format[MicrogridRequestData]
+  implicit val microgridReq: OFormat[MicrogridRequest]          = Json.format[MicrogridRequest]
+  implicit val microgridResData: OFormat[MicrogridResponseData] = Json.format[MicrogridResponseData]
+  implicit val microgridRes: OFormat[MicrogridResponse]         = Json.format[MicrogridResponse]
+  implicit val microgridCollRes: OFormat[MicrogridCollectionResponse] =
+    Json.format[MicrogridCollectionResponse]
 
   implicit val groupRelReq: OFormat[GroupRelationshipsRequest]      = Json.format[GroupRelationshipsRequest]
   implicit val groupAttrs: OFormat[GroupAttributes]                 = Json.format[GroupAttributes]

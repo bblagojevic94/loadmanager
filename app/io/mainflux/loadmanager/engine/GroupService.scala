@@ -9,7 +9,7 @@ class GroupService @Inject()(groupRepository: GroupRepository, microgridReposito
     implicit ec: ExecutionContext
 ) {
 
-  def createGroup(group: Group, grids: Seq[Long]): Future[Group] =
+  def create(group: Group, grids: Seq[Long]): Future[Group] =
     microgridRepository.retrieveAll(grids).flatMap {
       case Seq()      => Future.failed(new IllegalArgumentException("None of specified microgrids does not exist"))
       case microgrids => groupRepository.save(group.copy(grids = microgrids))
