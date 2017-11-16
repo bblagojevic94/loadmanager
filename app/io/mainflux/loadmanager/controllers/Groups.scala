@@ -2,39 +2,64 @@ package io.mainflux.loadmanager.controllers
 
 import javax.inject.Inject
 
-import io.mainflux.loadmanager.engine.GroupService
-import io.mainflux.loadmanager.hateoas.{GroupRequest, GroupResponse}
-import play.api.data.validation.ValidationError
-import play.api.libs.json.{JsPath, JsValue, Json}
+import io.mainflux.loadmanager.engine.{EntityNotFound, GroupRepository, MicrogridRepository}
+import io.mainflux.loadmanager.hateoas.{GroupCollectionResponse, GroupRequest, GroupResponse}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
-class Groups @Inject()(groupService: GroupService)(implicit val ec: ExecutionContext) extends Controller {
+class Groups @Inject()(groupRepository: GroupRepository, microgridRepository: MicrogridRepository)(
+    implicit val ec: ExecutionContext
+) extends ApiEndpoint {
 
   import io.mainflux.loadmanager.hateoas.JsonFormat._
 
-  def create: Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def create: Action[JsValue] = Action.async(JsonApiParser.json) { implicit request =>
     request.body
       .validate[GroupRequest]
       .fold(
         errors => createErrorResponse(errors),
         body => {
-          (groupService.createGroup _)
-            .tupled(body.data.toDomain)
-            .map(group => Created(Json.toJson(GroupResponse.fromDomain(group))))
+          val (group, grids) = body.data.toDomain
+          microgridRepository
+            .retrieveAllByIds(grids)
+            .flatMap {
+              case Seq() =>
+                Future.failed(new IllegalArgumentException("None of specified microgrids does not exist"))
+              case microgrids =>
+                groupRepository.save(group.copy(grids = microgrids)).map { savedGroup =>
+                  Created(Json.toJson(GroupResponse.fromDomain(savedGroup)))
+                    .as(JsonApiParser.JsonApiContentType)
+                }
+            }
         }
       )
   }
 
-  private def createErrorResponse(errors: Seq[(JsPath, Seq[ValidationError])]) = {
-    val invalidProperty: Option[String] = Try(errors.head._1.path.last.toString.tail).toOption
-    val detail: String = invalidProperty match {
-      case Some(property) =>
-        s"Property $property caused ${errors.head._2.head.messages.mkString(";")}"
-      case _ => s"Reason: ${errors.head._2.head.messages.mkString(";")}"
-    }
-    Future.failed(new IllegalArgumentException(s"Malformed JSON provided. $detail"))
+  def retrieveAll: Action[AnyContent] = Action.async {
+    groupRepository.retrieveAll
+      .map { groups =>
+        Ok(Json.toJson(GroupCollectionResponse.fromDomain(groups))).as(JsonApiParser.JsonApiContentType)
+      }
+  }
+
+  def retrieveOne(id: Long): Action[AnyContent] = Action.async {
+    groupRepository
+      .retrieveOne(id)
+      .map {
+        case Some(group) =>
+          Ok(Json.toJson(GroupResponse.fromDomain(group))).as(JsonApiParser.JsonApiContentType)
+        case _ => throw EntityNotFound(s"Group with id $id does not exists")
+      }
+  }
+
+  def remove(id: Long): Action[AnyContent] = Action.async {
+    groupRepository
+      .remove(id)
+      .map {
+        case 0 => throw EntityNotFound(s"Group with id $id does not exist")
+        case _ => NoContent
+      }
   }
 }

@@ -1,5 +1,7 @@
 import javax.inject.Singleton
 
+import io.mainflux.loadmanager.controllers.JsonApiParser
+import io.mainflux.loadmanager.engine.EntityNotFound
 import io.mainflux.loadmanager.hateoas.{Error, ErrorResponse}
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.Json
@@ -19,10 +21,11 @@ class ErrorHandler extends HttpErrorHandler {
   def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = {
     val response = exception match {
       case _: IllegalArgumentException => BadRequest(createResponse(400, exception.getMessage))
+      case EntityNotFound(message)     => NotFound(createResponse(404, message))
       case _                           => InternalServerError(createResponse(500, exception.getMessage))
     }
 
-    Future.successful(response)
+    Future.successful(response.as(JsonApiParser.JsonApiContentType))
   }
 
   private def createResponse(code: Int, message: String) = {

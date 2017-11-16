@@ -15,7 +15,20 @@ class PgMicrogridRepository @Inject()(protected val dbConfigProvider: DatabaseCo
     with HasDatabaseConfigProvider[JdbcProfile]
     with DatabaseSchema {
 
-  def findAll(grids: Seq[Long]): Future[Seq[Microgrid]] =
+  def save(microgrid: Microgrid): Future[Microgrid] = {
+    val dbAction = microgrids
+      .returning(microgrids.map(_.id))
+      .into((item, id) => item.copy(id = Some(id))) += microgrid
+    db.run(dbAction)
+  }
+
+  def retrieveOne(id: Long): Future[Option[Microgrid]] =
+    db.run(microgrids.filter(_.id === id).result.headOption)
+
+  def retrieveAll: Future[Seq[Microgrid]] =
+    db.run(microgrids.result)
+
+  def retrieveAllByIds(grids: Seq[Long]): Future[Seq[Microgrid]] =
     db.run(microgrids.filter(_.id.inSet(grids)).result)
 
 }
