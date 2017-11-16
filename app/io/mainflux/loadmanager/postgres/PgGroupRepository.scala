@@ -23,9 +23,9 @@ class PgGroupRepository @Inject()(protected val dbConfigProvider: DatabaseConfig
         .returning(groups.map(_.id))
         .into((item, id) => item.copy(id = Some(id))) += group
 
-      relations = group.grids.map(
-        grid => GroupMicrogrid(savedGroup.id.get, grid.id.get, LocalDateTime.now())
-      )
+      relations = group.grids.map { grid =>
+        GroupMicrogrid(savedGroup.id.get, grid.id.get, LocalDateTime.now())
+      }
 
       savedRelations <- groupsMicrogrids
         .returning(groupsMicrogrids.map(_.microgridId)) ++= relations

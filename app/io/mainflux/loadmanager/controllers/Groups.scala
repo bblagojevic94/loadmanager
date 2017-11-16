@@ -2,16 +2,16 @@ package io.mainflux.loadmanager.controllers
 
 import javax.inject.Inject
 
-import io.mainflux.loadmanager.engine.GroupService
+import io.mainflux.loadmanager.engine.{EntityNotFound, GroupRepository, MicrogridRepository}
 import io.mainflux.loadmanager.hateoas.{GroupCollectionResponse, GroupRequest, GroupResponse}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
-class Groups @Inject()(groupService: GroupService)(implicit val ec: ExecutionContext)
-    extends Controller
-    with ControllerAdvice {
+class Groups @Inject()(groupRepository: GroupRepository, microgridRepository: MicrogridRepository)(
+    implicit val ec: ExecutionContext
+) extends ApiEndpoint {
 
   import io.mainflux.loadmanager.hateoas.JsonFormat._
 
@@ -21,32 +21,45 @@ class Groups @Inject()(groupService: GroupService)(implicit val ec: ExecutionCon
       .fold(
         errors => createErrorResponse(errors),
         body => {
-          (groupService.create _)
-            .tupled(body.data.toDomain)
-            .map(
-              group =>
-                Created(Json.toJson(GroupResponse.fromDomain(group))).as(JsonApiParser.JsonApiContentType)
-            )
+          val (group, grids) = body.data.toDomain
+          microgridRepository
+            .retrieveAllByIds(grids)
+            .flatMap {
+              case Seq() =>
+                Future.failed(new IllegalArgumentException("None of specified microgrids does not exist"))
+              case microgrids =>
+                groupRepository.save(group.copy(grids = microgrids)).map { savedGroup =>
+                  Created(Json.toJson(GroupResponse.fromDomain(savedGroup)))
+                    .as(JsonApiParser.JsonApiContentType)
+                }
+            }
         }
       )
   }
 
   def retrieveAll: Action[AnyContent] = Action.async {
-    groupService
-      .retrieveAll()
-      .map(
-        groups =>
-          Ok(Json.toJson(GroupCollectionResponse.fromDomain(groups))).as(JsonApiParser.JsonApiContentType)
-      )
+    groupRepository.retrieveAll
+      .map { groups =>
+        Ok(Json.toJson(GroupCollectionResponse.fromDomain(groups))).as(JsonApiParser.JsonApiContentType)
+      }
   }
 
   def retrieveOne(id: Long): Action[AnyContent] = Action.async {
-    groupService
+    groupRepository
       .retrieveOne(id)
-      .map(group => Ok(Json.toJson(GroupResponse.fromDomain(group))).as(JsonApiParser.JsonApiContentType))
+      .map {
+        case Some(group) =>
+          Ok(Json.toJson(GroupResponse.fromDomain(group))).as(JsonApiParser.JsonApiContentType)
+        case _ => throw EntityNotFound(s"Group with id $id does not exists")
+      }
   }
 
   def remove(id: Long): Action[AnyContent] = Action.async {
-    groupService.remove(id).map(_ => NoContent)
+    groupRepository
+      .remove(id)
+      .map {
+        case 0 => throw EntityNotFound(s"Group with id $id does not exist")
+        case _ => NoContent
+      }
   }
 }

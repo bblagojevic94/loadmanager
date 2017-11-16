@@ -2,16 +2,15 @@ package io.mainflux.loadmanager.controllers
 
 import javax.inject.Inject
 
-import io.mainflux.loadmanager.engine.MicrogridService
+import io.mainflux.loadmanager.engine.{EntityNotFound, MicrogridRepository}
 import io.mainflux.loadmanager.hateoas.{MicrogridCollectionResponse, MicrogridRequest, MicrogridResponse}
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.ExecutionContext
 
-class Microgrids @Inject()(microgridService: MicrogridService)(implicit val ec: ExecutionContext)
-    extends Controller
-    with ControllerAdvice {
+class Microgrids @Inject()(microgridRepository: MicrogridRepository)(implicit val ec: ExecutionContext)
+    extends ApiEndpoint {
 
   import io.mainflux.loadmanager.hateoas.JsonFormat._
 
@@ -21,30 +20,29 @@ class Microgrids @Inject()(microgridService: MicrogridService)(implicit val ec: 
       .fold(
         errors => createErrorResponse(errors),
         body => {
-          microgridService
-            .create(body.data.toDomain)
-            .map(
-              mg =>
-                Created(Json.toJson(MicrogridResponse.fromDomain(mg))).as(JsonApiParser.JsonApiContentType)
-            )
+          microgridRepository
+            .save(body.data.toDomain)
+            .map { mg =>
+              Created(Json.toJson(MicrogridResponse.fromDomain(mg))).as(JsonApiParser.JsonApiContentType)
+            }
         }
       )
   }
 
   def retrieveOne(id: Long): Action[AnyContent] = Action.async {
-    microgridService
+    microgridRepository
       .retrieveOne(id)
-      .map(
-        microgrid =>
+      .map {
+        case Some(microgrid) =>
           Ok(Json.toJson(MicrogridResponse.fromDomain(microgrid))).as(JsonApiParser.JsonApiContentType)
-      )
+        case _ => throw EntityNotFound(s"Microgrid with id $id does not exist")
+      }
   }
 
   def retrieveAll: Action[AnyContent] = Action.async {
-    microgridService.retrieveAll.map(
-      microgrids =>
-        Ok(Json.toJson(MicrogridCollectionResponse.fromDomain(microgrids)))
-          .as(JsonApiParser.JsonApiContentType)
-    )
+    microgridRepository.retrieveAll.map { microgrids =>
+      Ok(Json.toJson(MicrogridCollectionResponse.fromDomain(microgrids)))
+        .as(JsonApiParser.JsonApiContentType)
+    }
   }
 }

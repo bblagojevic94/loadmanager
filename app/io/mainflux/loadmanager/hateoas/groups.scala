@@ -36,7 +36,9 @@ object GroupResponseData {
       GroupRelationshipsResponse(
         MicrogridsRelationships(
           Links(s"/$GroupType/${group.id.get}/relationships/$MicrogridType"),
-          group.grids.map(mg => MicrogridIdentifier(MicrogridType, mg.id.get))
+          group.grids.map { mg =>
+            MicrogridIdentifier(MicrogridType, mg.id.get)
+          }
         )
       )
     GroupResponseData(

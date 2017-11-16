@@ -10,6 +10,6 @@ trait MicrogridRepository {
 
   def retrieveAll: Future[Seq[Microgrid]]
 
-  def retrieveAll(grids: Seq[Long]): Future[Seq[Microgrid]]
+  def retrieveAllByIds(grids: Seq[Long]): Future[Seq[Microgrid]]
 
 }
