@@ -3,7 +3,7 @@ package io.mainflux.loadmanager.controllers
 import javax.inject.Inject
 
 import io.mainflux.loadmanager.engine.{EntityNotFound, GroupRepository, MicrogridRepository}
-import io.mainflux.loadmanager.hateoas.{GroupCollectionResponse, GroupRequest, GroupResponse}
+import io.mainflux.loadmanager.hateoas.{GroupCollectionResponse, GroupRequest, GroupResponse, MicrogridIdentifiers}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 
@@ -61,5 +61,49 @@ class Groups @Inject()(groupRepository: GroupRepository, microgridRepository: Mi
         case 0 => throw EntityNotFound(s"Group with id $id does not exist")
         case _ => NoContent
       }
+  }
+
+  def retrieveGroupMicrogrids(groupId: Long): Action[AnyContent] = Action.async {
+    groupRepository.retrieveOne(groupId).flatMap {
+      case Some(_) =>
+        microgridRepository.retrieveAllByGroup(groupId).map { microgrids =>
+          Ok(Json.toJson(MicrogridIdentifiers.fromDomain(microgrids))).as(JsonApiParser.JsonApiContentType)
+        }
+      case _ => Future.failed(EntityNotFound(s"Group with id $groupId does not exists"))
+    }
+  }
+
+  def addMicrogridsInGroup(groupId: Long): Action[JsValue] = Action.async(JsonApiParser.json) {
+    implicit request =>
+      request.body
+        .validate[MicrogridIdentifiers]
+        .fold(
+          errors => createErrorResponse(errors),
+          body => {
+            groupRepository.retrieveOne(groupId).flatMap {
+              case Some(_) => groupRepository.addMicrogrids(groupId, body.toDomain).map(_ => NoContent)
+              case _       => Future.failed(EntityNotFound(s"Group with id $groupId does not exists"))
+            }
+          }
+        )
+  }
+
+  def removeMicrogridsFromGroup(groupId: Long): Action[JsValue] = Action.async(JsonApiParser.json) {
+    implicit request =>
+      request.body
+        .validate[MicrogridIdentifiers]
+        .fold(
+          errors => createErrorResponse(errors),
+          body => {
+            groupRepository.retrieveOne(groupId).flatMap {
+              case Some(_) => groupRepository.removeMicrogrids(groupId, body.toDomain).map(_ => NoContent)
+              case _       => Future.failed(EntityNotFound(s"Group with id $groupId does not exists"))
+            }
+          }
+        )
+  }
+
+  def updateAllMicrogridsOfGroup(groupId: Long) = Action {
+    Forbidden(Json.toJson(NotSupportedResponse))
   }
 }

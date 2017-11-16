@@ -12,4 +12,7 @@ trait GroupRepository {
 
   def remove(id: Long): Future[Int]
 
+  def addMicrogrids(groupId: Long, microgrids: Seq[Long]): Future[Option[Int]]
+
+  def removeMicrogrids(groupId: Long, microgrids: Seq[Long]): Future[Int]
 }

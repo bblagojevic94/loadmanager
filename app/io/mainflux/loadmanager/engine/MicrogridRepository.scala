@@ -12,4 +12,6 @@ trait MicrogridRepository {
 
   def retrieveAllByIds(grids: Seq[Long]): Future[Seq[Microgrid]]
 
+  def retrieveAllByGroup(groupId: Long): Future[Seq[Long]]
+
 }

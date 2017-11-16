@@ -1,6 +1,5 @@
 package io.mainflux.loadmanager.postgres
 
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 import io.mainflux.loadmanager.engine.{Group, GroupMicrogrid, GroupRepository, Microgrid}
@@ -17,14 +16,14 @@ class PgGroupRepository @Inject()(protected val dbConfigProvider: DatabaseConfig
     with HasDatabaseConfigProvider[JdbcProfile]
     with DatabaseSchema {
 
-  def save(group: Group): Future[Group] = {
+  override def save(group: Group): Future[Group] = {
     val dbAction = (for {
       savedGroup <- groups
         .returning(groups.map(_.id))
         .into((item, id) => item.copy(id = Some(id))) += group
 
       relations = group.grids.map { grid =>
-        GroupMicrogrid(savedGroup.id.get, grid.id.get, LocalDateTime.now())
+        GroupMicrogrid(savedGroup.id.get, grid.id.get)
       }
 
       savedRelations <- groupsMicrogrids
@@ -69,6 +68,27 @@ class PgGroupRepository @Inject()(protected val dbConfigProvider: DatabaseConfig
       deleted <- groups.filter(_.id === id).delete
     } yield deleted).transactionally
 
+    db.run(dbAction)
+  }
+
+  def addMicrogrids(groupId: Long, microgridIds: Seq[Long]): Future[Option[Int]] = {
+    val dbAction = (for {
+      existingRels <- groupsMicrogrids
+        .filter(mg => mg.microgridId.inSet(microgridIds) && mg.groupId === groupId)
+        .map(_.microgridId)
+        .result
+      existingMgs <- microgrids.filter(_.id.inSet(microgridIds)).map(_.id).result
+      filtered = microgridIds.filter(mg => !existingRels.contains(mg) && existingMgs.contains(mg))
+      toInsert = filtered.map(mgId => GroupMicrogrid(groupId, mgId))
+      count <- groupsMicrogrids ++= toInsert
+    } yield count).transactionally
+
+    db.run(dbAction)
+  }
+
+  override def removeMicrogrids(groupId: Long, microgrids: Seq[Long]): Future[Int] = {
+    val dbAction =
+      groupsMicrogrids.filter(mg => mg.groupId === groupId && mg.microgridId.inSet(microgrids)).delete
     db.run(dbAction)
   }
 }
