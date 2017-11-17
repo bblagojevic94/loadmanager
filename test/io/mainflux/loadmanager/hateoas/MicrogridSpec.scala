@@ -42,14 +42,17 @@ class MicrogridSpec extends WordSpecLike with MustMatchers {
 
     "creating microgrid collection" should {
       "create valid response" in new Fixture {
-        val microgrids = Seq(
-          Microgrid(Option(1), "test-url-1", Platform.OSGP, "org-1"),
-          Microgrid(Option(2), "test-url-2", Platform.MAINFLUX, "org-2"),
-          Microgrid(Option(3), "test-url-3", Platform.OSGP, "org-3")
-        )
-
         val response: MicrogridCollectionResponse = MicrogridCollectionResponse.fromDomain(microgrids)
         (response.data.map(_.id) must contain).allElementsOf(microgrids.map(_.id.get))
+      }
+    }
+
+    "creating collection of microgrid identifiers" should {
+      "create valid response" in new Fixture {
+        val ids: Seq[Long]                 = microgrids.map(_.id.get)
+        val response: MicrogridIdentifiers = MicrogridIdentifiers.fromDomain(ids)
+        (response.data.map(_.id) must contain).allElementsOf(ids)
+        all(response.data.map(_.`type`)) must be(MicrogridType)
       }
     }
   }
@@ -57,5 +60,11 @@ class MicrogridSpec extends WordSpecLike with MustMatchers {
   trait Fixture {
     val microgrid =
       Microgrid(id = Option(1), url = "test-url", platform = Platform.MAINFLUX, organisationId = "test-org")
+
+    val microgrids = Seq(
+      Microgrid(Option(1), "test-url-1", Platform.OSGP, "org-1"),
+      Microgrid(Option(2), "test-url-2", Platform.MAINFLUX, "org-2"),
+      Microgrid(Option(3), "test-url-3", Platform.OSGP, "org-3")
+    )
   }
 }
