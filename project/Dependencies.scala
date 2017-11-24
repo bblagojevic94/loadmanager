@@ -4,8 +4,12 @@ object Dependencies {
   private object Versions {
     val postgres = "9.4.1207"
     val slick    = "2.1.0"
-    val webJars  = "2.6.1"
-    val swagger  = "3.2.2"
+
+    val akka = "2.5.6"
+
+    val webJars = "2.6.1"
+    val swagger = "3.2.2"
+    val logback = "1.2.3"
 
     val scalaTest = "2.0.0"
     val mockito   = "1.10.19"
@@ -15,8 +19,12 @@ object Dependencies {
   val slick: ModuleID           = "com.typesafe.play" %% "play-slick"            % Versions.slick
   val slickEvolutions: ModuleID = "com.typesafe.play" %% "play-slick-evolutions" % Versions.slick
 
-  val webJarsPlay: ModuleID = "org.webjars" %% "webjars-play" % Versions.webJars
-  val swagger: ModuleID     = "org.webjars" % "swagger-ui"    % Versions.swagger
+  val akkaActor: ModuleID   = "com.typesafe.akka" %% "akka-actor" % Versions.akka
+  val akkaLogging: ModuleID = "com.typesafe.akka" %% "akka-slf4j" % Versions.akka
+
+  val logback: ModuleID     = "ch.qos.logback" % "logback-classic" % Versions.logback
+  val webJarsPlay: ModuleID = "org.webjars"    %% "webjars-play"   % Versions.webJars
+  val swagger: ModuleID     = "org.webjars"    % "swagger-ui"      % Versions.swagger
 
   val scalaTest: ModuleID = "org.scalatestplus.play" %% "scalatestplus-play" % Versions.scalaTest
   val mockito: ModuleID   = "org.mockito"            % "mockito-all"         % Versions.mockito
