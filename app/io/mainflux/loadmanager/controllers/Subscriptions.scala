@@ -3,7 +3,11 @@ package io.mainflux.loadmanager.controllers
 import javax.inject.Inject
 
 import io.mainflux.loadmanager.engine.{EntityNotFound, GroupRepository, SubscriptionRepository}
-import io.mainflux.loadmanager.hateoas.{SubscriptionRequest, SubscriptionResponse}
+import io.mainflux.loadmanager.hateoas.{
+  SubscriptionCollectionResponse,
+  SubscriptionRequest,
+  SubscriptionResponse
+}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
 
@@ -48,4 +52,21 @@ class Subscriptions @Inject()(subscriptionRepository: SubscriptionRepository,
         case _ => throw EntityNotFound(s"Subscription with id $id does not exist")
       }
   }
+
+  def retrieveAll: Action[AnyContent] = Action.async {
+    subscriptionRepository.retrieveAll.map { subscriptions =>
+      Ok(Json.toJson(SubscriptionCollectionResponse.fromDomain(subscriptions)))
+        .as(JsonApiParser.JsonApiContentType)
+    }
+  }
+
+  def remove(id: Long): Action[AnyContent] = Action.async {
+    subscriptionRepository
+      .remove(id)
+      .map {
+        case 0 => throw EntityNotFound(s"Subscriber with id $id does not exist")
+        case _ => NoContent
+      }
+  }
+
 }

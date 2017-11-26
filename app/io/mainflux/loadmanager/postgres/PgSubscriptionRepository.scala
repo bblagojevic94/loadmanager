@@ -41,4 +41,30 @@ class PgSubscriptionRepository @Inject()(protected val dbConfigProvider: Databas
 
     db.run(dbAction)
   }
+
+  def retrieveAll: Future[Seq[Subscription]] = {
+    def fillSubscriptions(subscriptionGroups: Seq[(Subscription, Option[SubscriptionGroup])]) =
+      subscriptionGroups.groupBy(_._1).toSeq.map {
+        case (subscription, relation) =>
+          val groupIds = relation.flatMap(_._2.map(_.groupId))
+          subscription.copy(groupIds = groupIds)
+      }
+
+    val dbAction = for {
+      (subs, subsGroups) <- subscriptions
+        .joinLeft(subscriptionsGroups)
+        .on(_.id === _.subscriptionId)
+    } yield (subs, subsGroups)
+
+    db.run(dbAction.result).map(fillSubscriptions)
+  }
+
+  override def remove(id: Long): Future[Int] = {
+    val dbAction = (for {
+      _       <- subscriptionsGroups.filter(_.subscriptionId === id).delete
+      deleted <- subscriptions.filter(_.id === id).delete
+    } yield deleted).transactionally
+
+    db.run(dbAction)
+  }
 }

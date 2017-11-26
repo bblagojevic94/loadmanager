@@ -8,4 +8,7 @@ trait SubscriptionRepository {
 
   def retrieveOne(id: Long): Future[Option[Subscription]]
 
+  def remove(id: Long): Future[Int]
+
+  def retrieveAll: Future[Seq[Subscription]]
 }

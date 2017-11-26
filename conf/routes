@@ -16,8 +16,10 @@ POST    /groups/:groupId/relationships/microgrids   io.mainflux.loadmanager.cont
 PATCH   /groups/:groupId/relationships/microgrids   io.mainflux.loadmanager.controllers.Groups.updateAllMicrogridsOfGroup(groupId: Long)
 DELETE  /groups/:groupId/relationships/microgrids   io.mainflux.loadmanager.controllers.Groups.removeMicrogridsFromGroup(groupId: Long)
 
+GET     /subscribers                                io.mainflux.loadmanager.controllers.Subscriptions.retrieveAll()
 POST    /subscribers                                io.mainflux.loadmanager.controllers.Subscriptions.create()
 GET     /subscribers/:id                            io.mainflux.loadmanager.controllers.Subscriptions.retrieveOne(id: Long)
+DELETE  /subscribers/:id                            io.mainflux.loadmanager.controllers.Subscriptions.remove(id: Long)
 
 GET     /assets/*file                               controllers.Assets.versioned(path = "/public", file: Asset)
 GET     /swagger/*file                              controllers.Assets.at(path = "/public/lib/swagger-ui", file)
