@@ -8,6 +8,8 @@ trait GroupRepository {
 
   def retrieveAll: Future[Seq[Group]]
 
+  def retrieveAllByIds(groupIds: Seq[Long]): Future[Seq[Group]]
+
   def retrieveOne(id: Long): Future[Option[Group]]
 
   def remove(id: Long): Future[Int]

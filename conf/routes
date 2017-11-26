@@ -7,7 +7,7 @@ POST    /groups                                     io.mainflux.loadmanager.cont
 GET     /groups/:id                                 io.mainflux.loadmanager.controllers.Groups.retrieveOne(id: Long)
 DELETE  /groups/:id                                 io.mainflux.loadmanager.controllers.Groups.remove(id: Long)
 
-GET     /microgrids                                 io.mainflux.loadmanager.controllers.Microgrids.retrieveAll
+GET     /microgrids                                 io.mainflux.loadmanager.controllers.Microgrids.retrieveAll()
 POST    /microgrids                                 io.mainflux.loadmanager.controllers.Microgrids.create()
 GET     /microgrids/:id                             io.mainflux.loadmanager.controllers.Microgrids.retrieveOne(id: Long)
 
@@ -15,6 +15,9 @@ GET     /groups/:groupId/relationships/microgrids   io.mainflux.loadmanager.cont
 POST    /groups/:groupId/relationships/microgrids   io.mainflux.loadmanager.controllers.Groups.addMicrogridsInGroup(groupId: Long)
 PATCH   /groups/:groupId/relationships/microgrids   io.mainflux.loadmanager.controllers.Groups.updateAllMicrogridsOfGroup(groupId: Long)
 DELETE  /groups/:groupId/relationships/microgrids   io.mainflux.loadmanager.controllers.Groups.removeMicrogridsFromGroup(groupId: Long)
+
+POST    /subscribers                                io.mainflux.loadmanager.controllers.Subscriptions.create()
+GET     /subscribers/:id                            io.mainflux.loadmanager.controllers.Subscriptions.retrieveOne(id: Long)
 
 GET     /assets/*file                               controllers.Assets.versioned(path = "/public", file: Asset)
 GET     /swagger/*file                              controllers.Assets.at(path = "/public/lib/swagger-ui", file)

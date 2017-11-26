@@ -26,8 +26,7 @@ class PgGroupRepository @Inject()(protected val dbConfigProvider: DatabaseConfig
         GroupMicrogrid(savedGroup.id.get, grid.id.get)
       }
 
-      savedRelations <- groupsMicrogrids
-        .returning(groupsMicrogrids.map(_.microgridId)) ++= relations
+      savedRelations <- groupsMicrogrids.returning(groupsMicrogrids.map(_.microgridId)) ++= relations
 
       microgrids <- microgrids.filter(_.id.inSet(savedRelations)).result
     } yield savedGroup.copy(grids = microgrids)).transactionally
@@ -51,6 +50,9 @@ class PgGroupRepository @Inject()(protected val dbConfigProvider: DatabaseConfig
 
     db.run(dbAction.result).map(fillGroups)
   }
+
+  override def retrieveAllByIds(groupIds: Seq[Long]): Future[Seq[Group]] =
+    db.run(groups.filter(_.id.inSet(groupIds)).result)
 
   override def retrieveOne(id: Long): Future[Option[Group]] = {
     val dbAction = for {

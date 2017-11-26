@@ -2,16 +2,18 @@ package io.mainflux.loadmanager.persistence
 
 import java.time.LocalDateTime
 
-import io.mainflux.loadmanager.engine.{Group, GroupMicrogrid, Microgrid, Platform}
+import io.mainflux.loadmanager.engine._
 import io.mainflux.loadmanager.persistence.DatabaseMapper._
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ProvenShape, TableQuery}
 
 trait DatabaseSchema {
 
-  val microgrids: TableQuery[MicrogridRow]            = TableQuery[MicrogridRow]
-  val groups: TableQuery[GroupRow]                    = TableQuery[GroupRow]
-  val groupsMicrogrids: TableQuery[GroupMicrogridRow] = TableQuery[GroupMicrogridRow]
+  val microgrids: TableQuery[MicrogridRow]                  = TableQuery[MicrogridRow]
+  val groups: TableQuery[GroupRow]                          = TableQuery[GroupRow]
+  val subscriptions: TableQuery[SubscriptionRow]            = TableQuery[SubscriptionRow]
+  val groupsMicrogrids: TableQuery[GroupMicrogridRow]       = TableQuery[GroupMicrogridRow]
+  val subscriptionsGroups: TableQuery[SubscriptionGroupRow] = TableQuery[SubscriptionGroupRow]
 
   class MicrogridRow(tag: Tag) extends Table[Microgrid](tag, "microgrids") {
     def * : ProvenShape[Microgrid] = {
@@ -64,6 +66,44 @@ trait DatabaseSchema {
     def groupId: Rep[Long] = column[Long]("group_id")
 
     def microgridId: Rep[Long] = column[Long]("microgrid_id")
+
+    def createdAt: Rep[LocalDateTime] = column[LocalDateTime]("created_at")
+
+  }
+
+  class SubscriptionRow(tag: Tag) extends Table[Subscription](tag, "subscriptions") {
+    def * : ProvenShape[Subscription] = {
+
+      val props = (id.?, callback, createdAt).shaped
+
+      props.<>(
+        { tuple =>
+          Subscription.apply(id = tuple._1, callback = tuple._2, createdAt = tuple._3)
+        }, { (subscription: Subscription) =>
+          Some((subscription.id, subscription.callback, subscription.createdAt))
+        }
+      )
+    }
+
+    def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
+    def callback: Rep[String] = column[String]("callback")
+
+    def createdAt: Rep[LocalDateTime] = column[LocalDateTime]("created_at")
+
+  }
+
+  class SubscriptionGroupRow(tag: Tag) extends Table[SubscriptionGroup](tag, "subscriptions_groups") {
+    def * : ProvenShape[SubscriptionGroup] = {
+
+      val props = (subscriptionId, groupId, createdAt)
+
+      props <> (SubscriptionGroup.tupled, SubscriptionGroup.unapply)
+    }
+
+    def subscriptionId: Rep[Long] = column[Long]("subscription_id")
+
+    def groupId: Rep[Long] = column[Long]("group_id")
 
     def createdAt: Rep[LocalDateTime] = column[LocalDateTime]("created_at")
 
