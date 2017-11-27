@@ -69,3 +69,10 @@ final case class GroupIdentifier(`type`: String, id: Long)
 final case class GroupIdentifiers(data: Seq[GroupIdentifier]) {
   def toDomain: Seq[Long] = data.map(_.id)
 }
+
+object GroupIdentifiers {
+  def fromDomain(groups: Seq[Long]): GroupIdentifiers =
+    GroupIdentifiers(groups.map { groupId =>
+      GroupIdentifier(GroupType, groupId)
+    })
+}

@@ -11,4 +11,9 @@ trait SubscriptionRepository {
   def remove(id: Long): Future[Int]
 
   def retrieveAll: Future[Seq[Subscription]]
+
+  def subscribeOnGroups(subscriptionId: Long, groupIds: Seq[Long]): Future[Option[Int]]
+
+  def unsubscribeFromGroups(subscriptionId: Long, groupIds: Seq[Long]): Future[Int]
+
 }

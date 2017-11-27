@@ -73,7 +73,7 @@ class PgGroupRepository @Inject()(protected val dbConfigProvider: DatabaseConfig
     db.run(dbAction)
   }
 
-  def addMicrogrids(groupId: Long, microgridIds: Seq[Long]): Future[Option[Int]] = {
+  override def addMicrogrids(groupId: Long, microgridIds: Seq[Long]): Future[Option[Int]] = {
     val dbAction = (for {
       existingRels <- groupsMicrogrids
         .filter(mg => mg.microgridId.inSet(microgridIds) && mg.groupId === groupId)
@@ -93,4 +93,10 @@ class PgGroupRepository @Inject()(protected val dbConfigProvider: DatabaseConfig
       groupsMicrogrids.filter(mg => mg.groupId === groupId && mg.microgridId.inSet(microgrids)).delete
     db.run(dbAction)
   }
+
+  override def retrieveAllBySubscription(subscriptionId: Long): Future[Seq[Long]] = {
+    val dbAction = subscriptionsGroups.filter(_.subscriptionId === subscriptionId).result
+    db.run(dbAction).map(_.map(_.groupId))
+  }
+
 }

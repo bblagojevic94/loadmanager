@@ -17,4 +17,7 @@ trait GroupRepository {
   def addMicrogrids(groupId: Long, microgrids: Seq[Long]): Future[Option[Int]]
 
   def removeMicrogrids(groupId: Long, microgrids: Seq[Long]): Future[Int]
+
+  def retrieveAllBySubscription(subscriptionId: Long): Future[Seq[Long]]
+
 }

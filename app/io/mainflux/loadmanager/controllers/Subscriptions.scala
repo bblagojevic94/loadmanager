@@ -3,11 +3,7 @@ package io.mainflux.loadmanager.controllers
 import javax.inject.Inject
 
 import io.mainflux.loadmanager.engine.{EntityNotFound, GroupRepository, SubscriptionRepository}
-import io.mainflux.loadmanager.hateoas.{
-  SubscriptionCollectionResponse,
-  SubscriptionRequest,
-  SubscriptionResponse
-}
+import io.mainflux.loadmanager.hateoas._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
 
@@ -67,6 +63,54 @@ class Subscriptions @Inject()(subscriptionRepository: SubscriptionRepository,
         case 0 => throw EntityNotFound(s"Subscriber with id $id does not exist")
         case _ => NoContent
       }
+  }
+
+  def retrieveSubscriberGroups(subscriberId: Long): Action[AnyContent] = Action.async {
+    subscriptionRepository.retrieveOne(subscriberId).flatMap {
+      case Some(_) =>
+        groupRepository.retrieveAllBySubscription(subscriberId).map { groups =>
+          Ok(Json.toJson(GroupIdentifiers.fromDomain(groups))).as(JsonApiParser.JsonApiContentType)
+        }
+      case _ => Future.failed(EntityNotFound(s"Subscriber with id $subscriberId does not exists"))
+    }
+  }
+
+  def subscribeOnGroups(subscriberId: Long): Action[JsValue] = Action.async(JsonApiParser.json) {
+    implicit request =>
+      request.body
+        .validate[GroupIdentifiers]
+        .fold(
+          errors => createErrorResponse(errors),
+          body => {
+            subscriptionRepository.retrieveOne(subscriberId).flatMap {
+              case Some(_) =>
+                subscriptionRepository.subscribeOnGroups(subscriberId, body.toDomain).map(_ => NoContent)
+              case _ => Future.failed(EntityNotFound(s"Subscriber with id $subscriberId does not exists"))
+            }
+          }
+        )
+  }
+
+  def unsubscribeFromGroups(subscriberId: Long): Action[JsValue] = Action.async(JsonApiParser.json) {
+    implicit request =>
+      request.body
+        .validate[GroupIdentifiers]
+        .fold(
+          errors => createErrorResponse(errors),
+          body => {
+            subscriptionRepository.retrieveOne(subscriberId).flatMap {
+              case Some(_) =>
+                subscriptionRepository
+                  .unsubscribeFromGroups(subscriberId, body.toDomain)
+                  .map(_ => NoContent)
+              case _ => Future.failed(EntityNotFound(s"Subscriber with id $subscriberId does not exists"))
+            }
+          }
+        )
+  }
+
+  def updateAllGroupsOfSubscription(subscriberId: Long) = Action {
+    Forbidden(Json.toJson(NotSupportedResponse))
   }
 
 }

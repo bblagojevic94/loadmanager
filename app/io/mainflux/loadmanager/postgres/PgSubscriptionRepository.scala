@@ -67,4 +67,27 @@ class PgSubscriptionRepository @Inject()(protected val dbConfigProvider: Databas
 
     db.run(dbAction)
   }
+
+  override def subscribeOnGroups(subscriptionId: Long, groupIds: Seq[Long]): Future[Option[Int]] = {
+    val dbAction = (for {
+      existingRels <- subscriptionsGroups
+        .filter(sg => sg.groupId.inSet(groupIds) && sg.subscriptionId === subscriptionId)
+        .map(_.groupId)
+        .result
+      existingGroups <- groups.filter(_.id.inSet(groupIds)).map(_.id).result
+      filtered = groupIds.filter(g => !existingRels.contains(g) && existingGroups.contains(g))
+      toInsert = filtered.map(groupId => SubscriptionGroup(subscriptionId, groupId))
+      count <- subscriptionsGroups ++= toInsert
+    } yield count).transactionally
+
+    db.run(dbAction)
+  }
+
+  override def unsubscribeFromGroups(subscriptionId: Long, groupIds: Seq[Long]): Future[Int] = {
+    val dbAction = subscriptionsGroups
+      .filter(sg => sg.subscriptionId === subscriptionId && sg.groupId.inSet(groupIds))
+      .delete
+    db.run(dbAction)
+  }
+
 }
