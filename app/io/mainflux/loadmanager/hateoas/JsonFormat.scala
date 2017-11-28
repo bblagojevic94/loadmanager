@@ -19,6 +19,8 @@ object JsonFormat {
   implicit val microgridCollRes: OFormat[MicrogridCollectionResponse] =
     Json.format[MicrogridCollectionResponse]
 
+  implicit val groupId: OFormat[GroupIdentifier]                    = Json.format[GroupIdentifier]
+  implicit val groupIdColl: OFormat[GroupIdentifiers]               = Json.format[GroupIdentifiers]
   implicit val groupRelReq: OFormat[GroupRelationshipsRequest]      = Json.format[GroupRelationshipsRequest]
   implicit val groupAttrs: OFormat[GroupAttributes]                 = Json.format[GroupAttributes]
   implicit val groupData: OFormat[GroupData]                        = Json.format[GroupData]
@@ -28,5 +30,18 @@ object JsonFormat {
   implicit val groupResData: OFormat[GroupResponseData]             = Json.format[GroupResponseData]
   implicit val groupRes: OFormat[GroupResponse]                     = Json.format[GroupResponse]
   implicit val groupCollectionRes: OFormat[GroupCollectionResponse] = Json.format[GroupCollectionResponse]
+
+  implicit val subRelReq: OFormat[SubscriptionRelationshipsRequest] =
+    Json.format[SubscriptionRelationshipsRequest]
+  implicit val subAttrs: OFormat[SubscriptionAttributes] = Json.format[SubscriptionAttributes]
+  implicit val subData: OFormat[SubscriptionData]        = Json.format[SubscriptionData]
+  implicit val subReq: OFormat[SubscriptionRequest]      = Json.format[SubscriptionRequest]
+  implicit val subsRel: OFormat[GroupsRelationships]     = Json.format[GroupsRelationships]
+  implicit val subRelRes: OFormat[SubscriptionRelationshipsResponse] =
+    Json.format[SubscriptionRelationshipsResponse]
+  implicit val subResData: OFormat[SubscriptionResponseData] = Json.format[SubscriptionResponseData]
+  implicit val subRes: OFormat[SubscriptionResponse]         = Json.format[SubscriptionResponse]
+  implicit val subCollectionRes: OFormat[SubscriptionCollectionResponse] =
+    Json.format[SubscriptionCollectionResponse]
 
 }

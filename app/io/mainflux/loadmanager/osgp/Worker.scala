@@ -2,7 +2,7 @@ package io.mainflux.loadmanager.osgp
 
 import akka.actor.{Actor, ActorLogging}
 import io.mainflux.loadmanager.engine.Grid
-import io.mainflux.loadmanager.engine.Subscription.AggregateLoad
+import io.mainflux.loadmanager.engine.Subscriptions.AggregateLoad
 
 import scala.util.Random
 

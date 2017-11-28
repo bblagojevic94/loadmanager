@@ -10,6 +10,7 @@ package object hateoas {
 
   final case class Meta(createdAt: String = DateTime.now().toString)
 
-  val GroupType     = "groups"
-  val MicrogridType = "microgrids"
+  val GroupType      = "groups"
+  val MicrogridType  = "microgrids"
+  val SubscriberType = "subscribers"
 }

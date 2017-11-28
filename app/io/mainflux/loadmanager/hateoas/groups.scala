@@ -1,7 +1,5 @@
 package io.mainflux.loadmanager.hateoas
 
-import java.time.LocalDateTime
-
 import io.mainflux.loadmanager.engine.Group
 
 final case class GroupRequest(data: GroupData)
@@ -10,7 +8,7 @@ final case class GroupData(`type`: String,
                            attributes: GroupAttributes,
                            relationships: GroupRelationshipsRequest) {
   def toDomain: (Group, Seq[Long]) =
-    (Group(name = attributes.name, createdAt = LocalDateTime.now()), relationships.microgrids.data.map(_.id))
+    (Group(name = attributes.name), relationships.microgrids.data.map(_.id))
 }
 
 final case class GroupAttributes(name: String)
@@ -64,4 +62,17 @@ object GroupCollectionResponse {
     val data: Seq[GroupResponseData] = groups.map(GroupResponseData.fromDomain)
     GroupCollectionResponse(data)
   }
+}
+
+final case class GroupIdentifier(`type`: String, id: Long)
+
+final case class GroupIdentifiers(data: Seq[GroupIdentifier]) {
+  def toDomain: Seq[Long] = data.map(_.id)
+}
+
+object GroupIdentifiers {
+  def fromDomain(groups: Seq[Long]): GroupIdentifiers =
+    GroupIdentifiers(groups.map { groupId =>
+      GroupIdentifier(GroupType, groupId)
+    })
 }

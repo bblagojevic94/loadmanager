@@ -8,6 +8,8 @@ trait GroupRepository {
 
   def retrieveAll: Future[Seq[Group]]
 
+  def retrieveAllByIds(groupIds: Seq[Long]): Future[Seq[Group]]
+
   def retrieveOne(id: Long): Future[Option[Group]]
 
   def remove(id: Long): Future[Int]
@@ -15,4 +17,7 @@ trait GroupRepository {
   def addMicrogrids(groupId: Long, microgrids: Seq[Long]): Future[Option[Int]]
 
   def removeMicrogrids(groupId: Long, microgrids: Seq[Long]): Future[Int]
+
+  def retrieveAllBySubscription(subscriptionId: Long): Future[Seq[Long]]
+
 }
