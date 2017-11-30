@@ -33,7 +33,8 @@ object Dependencies {
   val scalaParser = "org.scala-lang.modules"  %% "scala-parser-combinators" % Versions.scalaXml
   val dispatch    = "net.databinder.dispatch" %% "dispatch-core"            % Versions.dispatch
 
-  val scalaTest: ModuleID = "org.scalatestplus.play" %% "scalatestplus-play" % Versions.scalaTest
-  val mockito: ModuleID   = "org.mockito"            % "mockito-all"         % Versions.mockito
+  val scalaTest: ModuleID   = "org.scalatestplus.play" %% "scalatestplus-play" % Versions.scalaTest
+  val mockito: ModuleID     = "org.mockito"            % "mockito-all"         % Versions.mockito
+  val akkaTestKit: ModuleID = "com.typesafe.akka"      %% "akka-testkit"       % Versions.akka
 
 }

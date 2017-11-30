@@ -1,11 +1,11 @@
 package io.mainflux.loadmanager.engine
 
 import akka.actor.{ActorLogging, ActorRef, Props, Stash, Timers}
+import akka.pattern.pipe
 import akka.routing.FromConfig
 import com.google.inject.Inject
 import io.mainflux.loadmanager.osgp.Worker
 import io.mainflux.loadmanager.osgp.Worker.CalculateLoad
-import play.api.Configuration
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -32,16 +32,15 @@ object Subscriptions {
 
   final case class MicrogridLoad(microgrid: Grid, value: Option[Double] = None)
 
-  private val PoolingPeriod: FiniteDuration = 3.seconds
+  private val PoolingPeriod: FiniteDuration = 1.minute
 }
 
 class Subscriptions @Inject()(groupRepository: GroupRepository,
-                              subscriptionRepository: SubscriptionRepository,
-                              conf: Configuration)(
-                               implicit val ec: ExecutionContext
-                             ) extends Timers
-  with ActorLogging
-  with Stash {
+                              subscriptionRepository: SubscriptionRepository)(
+    implicit val ec: ExecutionContext
+) extends Timers
+    with ActorLogging
+    with Stash {
 
   import Subscriptions._
 
@@ -57,19 +56,23 @@ class Subscriptions @Inject()(groupRepository: GroupRepository,
       }
     } yield (microgrids, subscriptions)
 
-    initValues.map {
-      case (microgrids, subscriptions) =>
-        timers.startPeriodicTimer(TickKey, Tick, PoolingPeriod)
-        context.self ! InitializationDone(State(microgrids, subscriptions))
-    }
+    initValues
+      .map {
+        case (microgrids, subscriptions) =>
+          InitializationDone(State(microgrids, subscriptions))
+      }
+      .pipeTo(context.self)
   }
 
   override def receive: Receive = uninitialized
 
   def uninitialized: Receive = {
     case InitializationDone(state) =>
-      unstashAll
       context.become(initialized(state))
+      unstashAll()
+    case state: State =>
+      timers.startPeriodicTimer(TickKey, Tick, PoolingPeriod)
+      context.self ! InitializationDone(state)
     case _ => stash()
   }
 
