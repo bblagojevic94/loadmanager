@@ -12,8 +12,8 @@ trait SubscriptionRepository {
 
   def retrieveAll: Future[Seq[Subscription]]
 
-  def subscribeOnGroups(subscriptionId: Long, groupIds: Seq[Long]): Future[Option[Int]]
+  def subscribeOnGroups(subscriptionId: Long, groupIds: Seq[Long]): Future[Seq[Long]]
 
-  def unsubscribeFromGroups(subscriptionId: Long, groupIds: Seq[Long]): Future[Int]
+  def unsubscribeFromGroups(subscriptionId: Long, groupIds: Seq[Long]): Future[Seq[Long]]
 
 }

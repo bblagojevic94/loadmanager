@@ -48,11 +48,11 @@ class Subscriptions @Inject()(groupRepository: GroupRepository,
 
   override def preStart: Unit = {
     val initValues = for {
-      microgrids <- groupRepository.retrieveAll.map {
-        _.map(group => group.id.get -> group.grids.map(grid => grid.id.get -> MicrogridLoad(grid)).toMap).toMap
-      }
       subscriptions <- subscriptionRepository.retrieveAll.map {
         _.flatMap(s => s.groupIds.map(_ -> s)).groupBy(_._1).mapValues(_.map(_._2))
+      }
+      microgrids <- groupRepository.retrieveAll(subscriptions.keySet).map {
+        _.map(group => group.id.get -> group.grids.map(grid => grid.id.get -> MicrogridLoad(grid)).toMap).toMap
       }
     } yield (microgrids, subscriptions)
 
