@@ -9,7 +9,6 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{MustMatchers, WordSpecLike}
 
-import scala.collection.immutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -121,7 +120,7 @@ class GroupServiceSpec
         when(groupRepository.hasSubscriptions(group.id.get)).thenReturn(Future.successful(true))
 
         groupService.addMicrogrids(group.id.get, microgrids.map(_.id.get))
-        val messages: Seq[Subscriptions.AddMicrogrid] = microgrids.map(mg => AddMicrogrid(mg, group.id.get))
+        val messages: Seq[AddMicrogrid] = microgrids.map(mg => AddMicrogrid(mg, group.id.get))
         subscriptions.expectMsgAllOf(messages: _*)
       }
       "successfully add microgrids and does not send message to subscription actor" in new Fixture {
@@ -149,7 +148,7 @@ class GroupServiceSpec
         when(groupRepository.hasSubscriptions(group.id.get)).thenReturn(Future.successful(true))
 
         groupService.removeMicrogrids(group.id.get, microgrids.map(_.id.get))
-        val messages: Seq[Subscriptions.RemoveMicrogrid] =
+        val messages: Seq[RemoveMicrogrid] =
           microgrids.map(mg => RemoveMicrogrid(mg.id.get, group.id.get))
         subscriptions.expectMsgAllOf(messages: _*)
       }
@@ -179,8 +178,8 @@ class GroupServiceSpec
 
     val groupService = new GroupService(groupRepository, microgridRepository, subscriptions.ref)
 
-    val microgrids: immutable.IndexedSeq[Microgrid] = (0 until 3).map(createMicrogrid)
-    val group: Group                                = createGroup(1, microgrids)
+    val microgrids: Seq[Microgrid] = (0 until 3).map(createMicrogrid)
+    val group: Group               = createGroup(1, microgrids)
   }
 
   def createMicrogrid(seed: Int): Microgrid =
