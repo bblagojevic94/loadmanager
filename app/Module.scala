@@ -7,8 +7,8 @@ class Module extends AbstractModule with AkkaGuiceSupport {
   override def configure(): Unit = {
     bind(classOf[MicrogridRepository]).to(classOf[PgMicrogridRepository])
     bind(classOf[GroupRepository]).to(classOf[PgGroupRepository])
-
-    bindActor[Subscriptions]("subscription")
     bind(classOf[SubscriptionRepository]).to(classOf[PgSubscriptionRepository])
+
+    bindActor[Subscriptions]("subscription", props => props.withDispatcher("akka.actor.stash-dispatcher"))
   }
 }

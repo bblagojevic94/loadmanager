@@ -10,7 +10,7 @@ lazy val buildSettings = Seq(
 lazy val coreLibs =
   Seq(ws, postgres, slick, slickEvolutions, akkaActor, akkaLogging, logback, webJarsPlay, swagger)
 lazy val xmlLibs  = Seq(scalaXml, scalaParser, dispatch)
-lazy val testLibs = Seq(scalaTest, mockito).map(_ % Test)
+lazy val testLibs = Seq(scalaTest, mockito, akkaTestKit).map(_ % Test)
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, ScalaxbPlugin)
