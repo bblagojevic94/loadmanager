@@ -68,7 +68,7 @@ class PgSubscriptionRepository @Inject()(protected val dbConfigProvider: Databas
     db.run(dbAction)
   }
 
-  override def subscribeOnGroups(subscriptionId: Long, groupIds: Seq[Long]): Future[Option[Int]] = {
+  override def subscribeOnGroups(subscriptionId: Long, groupIds: Seq[Long]): Future[Seq[Long]] = {
     val dbAction = (for {
       existingRels <- subscriptionsGroups
         .filter(sg => sg.groupId.inSet(groupIds) && sg.subscriptionId === subscriptionId)
@@ -77,16 +77,19 @@ class PgSubscriptionRepository @Inject()(protected val dbConfigProvider: Databas
       existingGroups <- groups.filter(_.id.inSet(groupIds)).map(_.id).result
       filtered = groupIds.filter(g => !existingRels.contains(g) && existingGroups.contains(g))
       toInsert = filtered.map(groupId => SubscriptionGroup(subscriptionId, groupId))
-      count <- subscriptionsGroups ++= toInsert
-    } yield count).transactionally
+      addedGroups <- subscriptionsGroups.returning(subscriptionsGroups.map(_.groupId)) ++= toInsert
+    } yield addedGroups).transactionally
 
     db.run(dbAction)
   }
 
-  override def unsubscribeFromGroups(subscriptionId: Long, groupIds: Seq[Long]): Future[Int] = {
-    val dbAction = subscriptionsGroups
-      .filter(sg => sg.subscriptionId === subscriptionId && sg.groupId.inSet(groupIds))
-      .delete
+  override def unsubscribeFromGroups(subscriptionId: Long, groupIds: Seq[Long]): Future[Seq[Long]] = {
+    val query =
+      subscriptionsGroups.filter(sg => sg.subscriptionId === subscriptionId && sg.groupId.inSet(groupIds))
+    val dbAction = (for {
+      toRemove <- query.result
+      _        <- query.delete
+    } yield toRemove.map(_.groupId)).transactionally
     db.run(dbAction)
   }
 

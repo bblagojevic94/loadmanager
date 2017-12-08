@@ -34,7 +34,7 @@ class PgGroupRepository @Inject()(protected val dbConfigProvider: DatabaseConfig
     db.run(dbAction)
   }
 
-  override def retrieveAll: Future[Seq[Group]] = {
+  override def retrieveAll(groupIds: Set[Long] = Set()): Future[Seq[Group]] = {
     def fillGroups(groupMicrogrids: Seq[(Group, Option[(GroupMicrogrid, Microgrid)])]) =
       groupMicrogrids.groupBy(_._1).toSeq.map {
         case (group, relation) =>
@@ -42,17 +42,15 @@ class PgGroupRepository @Inject()(protected val dbConfigProvider: DatabaseConfig
           group.copy(grids = grids)
       }
 
+    val query = if (groupIds.isEmpty) groups else groups.filter(_.id.inSet(groupIds))
     val dbAction = for {
-      (groups, groupMicrogrids) <- groups
+      (groups, groupMicrogrids) <- query
         .joinLeft(groupsMicrogrids.join(microgrids).on(_.microgridId === _.id))
         .on(_.id === _._1.groupId)
     } yield (groups, groupMicrogrids)
 
     db.run(dbAction.result).map(fillGroups)
   }
-
-  override def retrieveAllByIds(groupIds: Seq[Long]): Future[Seq[Group]] =
-    db.run(groups.filter(_.id.inSet(groupIds)).result)
 
   override def retrieveOne(id: Long): Future[Option[Group]] = {
     val dbAction = for {
@@ -67,30 +65,36 @@ class PgGroupRepository @Inject()(protected val dbConfigProvider: DatabaseConfig
   override def remove(id: Long): Future[Int] = {
     val dbAction = (for {
       _       <- groupsMicrogrids.filter(_.groupId === id).delete
+      _       <- subscriptionsGroups.filter(_.groupId === id).delete
       deleted <- groups.filter(_.id === id).delete
     } yield deleted).transactionally
 
     db.run(dbAction)
   }
 
-  override def addMicrogrids(groupId: Long, microgridIds: Seq[Long]): Future[Option[Int]] = {
+  override def addMicrogrids(groupId: Long, microgridIds: Seq[Long]): Future[Seq[Microgrid]] = {
     val dbAction = (for {
       existingRels <- groupsMicrogrids
         .filter(mg => mg.microgridId.inSet(microgridIds) && mg.groupId === groupId)
         .map(_.microgridId)
         .result
-      existingMgs <- microgrids.filter(_.id.inSet(microgridIds)).map(_.id).result
-      filtered = microgridIds.filter(mg => !existingRels.contains(mg) && existingMgs.contains(mg))
+      existingMgs <- microgrids.filter(_.id.inSet(microgridIds)).result
+      filtered = microgridIds.filter { mg =>
+        !existingRels.contains(mg) && existingMgs.map(_.id.get).contains(mg)
+      }
       toInsert = filtered.map(mgId => GroupMicrogrid(groupId, mgId))
-      count <- groupsMicrogrids ++= toInsert
-    } yield count).transactionally
+      _ <- groupsMicrogrids ++= toInsert
+    } yield existingMgs).transactionally
 
     db.run(dbAction)
   }
 
-  override def removeMicrogrids(groupId: Long, microgrids: Seq[Long]): Future[Int] = {
-    val dbAction =
-      groupsMicrogrids.filter(mg => mg.groupId === groupId && mg.microgridId.inSet(microgrids)).delete
+  override def removeMicrogrids(groupId: Long, microgrids: Seq[Long]): Future[Seq[Long]] = {
+    val query = groupsMicrogrids.filter(mg => mg.groupId === groupId && mg.microgridId.inSet(microgrids))
+    val dbAction = (for {
+      toRemove <- query.result
+      _        <- query.delete
+    } yield toRemove.map(_.microgridId)).transactionally
     db.run(dbAction)
   }
 
@@ -99,4 +103,8 @@ class PgGroupRepository @Inject()(protected val dbConfigProvider: DatabaseConfig
     db.run(dbAction).map(_.map(_.groupId))
   }
 
+  override def hasSubscriptions(groupId: Long): Future[Boolean] = {
+    val dbAction = subscriptionsGroups.filter(_.groupId === groupId).exists
+    db.run(dbAction.result)
+  }
 }

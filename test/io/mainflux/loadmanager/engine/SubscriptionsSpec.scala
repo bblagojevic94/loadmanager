@@ -43,12 +43,14 @@ class SubscriptionsSpec
 
   val groups: Seq[Group]               = (0 until numberOfGroups).map(createGroup)
   val subscriptions: Seq[Subscription] = (0 until 3).map(n => createSubscription(n, numberOfGroups))
+  val subscribedGroupsIds: Set[Long] = subscriptions.flatMap(_.groupIds).distinct.toSet
+  val subscribedGroups: Seq[Group] = groups.filter(g => subscribedGroupsIds.contains(g.id.get))
 
-  when(groupRepository.retrieveAll).thenReturn(Future.successful(groups))
+  when(groupRepository.retrieveAll(subscribedGroupsIds)).thenReturn(Future.successful(subscribedGroups))
   when(subscriptionRepository.retrieveAll).thenReturn(Future.successful(subscriptions))
 
   val messages: Seq[CalculateLoad] =
-    groups.flatMap { group =>
+    subscribedGroups.flatMap { group =>
       group.grids.map { mg =>
         CalculateLoad(group.id.get, mg)
       }
@@ -78,7 +80,7 @@ class SubscriptionsSpec
     "add microgrid to actor state" must {
       "calculate load for same" in {
         val microgrid: Microgrid = createMicrogrid(100)
-        val groupId: Long        = groups.head.id.get
+        val groupId: Long        = subscribedGroups.head.id.get
 
         subsActor ! AddMicrogrid(microgrid, groupId = groupId)
         subsActor ! Tick
@@ -89,7 +91,7 @@ class SubscriptionsSpec
 
     "remove group from actor state" must {
       "not calculate load for same" in {
-        val groupId: Long = groups.head.id.get
+        val groupId: Long = subscribedGroups.head.id.get
 
         subsActor ! RemoveGroup(groupId)
         subsActor ! Tick

@@ -6,18 +6,17 @@ trait GroupRepository {
 
   def save(group: Group): Future[Group]
 
-  def retrieveAll: Future[Seq[Group]]
-
-  def retrieveAllByIds(groupIds: Seq[Long]): Future[Seq[Group]]
+  def retrieveAll(groupIds: Set[Long] = Set()): Future[Seq[Group]]
 
   def retrieveOne(id: Long): Future[Option[Group]]
 
   def remove(id: Long): Future[Int]
 
-  def addMicrogrids(groupId: Long, microgrids: Seq[Long]): Future[Option[Int]]
+  def addMicrogrids(groupId: Long, microgrids: Seq[Long]): Future[Seq[Microgrid]]
 
-  def removeMicrogrids(groupId: Long, microgrids: Seq[Long]): Future[Int]
+  def removeMicrogrids(groupId: Long, microgrids: Seq[Long]): Future[Seq[Long]]
 
   def retrieveAllBySubscription(subscriptionId: Long): Future[Seq[Long]]
 
+  def hasSubscriptions(groupId: Long): Future[Boolean]
 }
