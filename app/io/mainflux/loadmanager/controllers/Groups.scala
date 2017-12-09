@@ -3,17 +3,16 @@ package io.mainflux.loadmanager.controllers
 import javax.inject.Inject
 
 import io.mainflux.loadmanager.engine.{GroupService, MicrogridRepository}
-import io.mainflux.loadmanager.hateoas.{GroupCollectionResponse, GroupRequest, GroupResponse, MicrogridIdentifiers}
+import io.mainflux.loadmanager.hateoas._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
-class Groups @Inject()(groupService: GroupService, microgridRepository: MicrogridRepository)(
-    implicit val ec: ExecutionContext
-) extends ApiEndpoint {
-
-  import io.mainflux.loadmanager.hateoas.JsonFormat._
+final class Groups @Inject()(groupService: GroupService,
+                             microgridRepository: MicrogridRepository,
+                             cc: ControllerComponents)(implicit val ec: ExecutionContext)
+    extends ApiEndpoint(cc) {
 
   def create: Action[JsValue] = Action.async(JsonApiParser.json) { implicit request =>
     request.body

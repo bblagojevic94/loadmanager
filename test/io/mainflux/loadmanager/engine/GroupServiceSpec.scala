@@ -130,7 +130,7 @@ class GroupServiceSpec
         when(groupRepository.hasSubscriptions(group.id.get)).thenReturn(Future.successful(false))
 
         groupService.addMicrogrids(group.id.get, microgrids.map(_.id.get))
-        subscriptions.expectNoMessage(3.seconds)
+        subscriptions.expectNoMsg(3.seconds)
       }
       "should throw exception if group does not exists" in new Fixture {
         when(groupRepository.retrieveOne(group.id.get)).thenReturn(Future.successful(None))
@@ -159,7 +159,7 @@ class GroupServiceSpec
         when(groupRepository.hasSubscriptions(group.id.get)).thenReturn(Future.successful(false))
 
         groupService.removeMicrogrids(group.id.get, microgrids.map(_.id.get))
-        subscriptions.expectNoMessage(3.seconds)
+        subscriptions.expectNoMsg(3.seconds)
       }
       "should throw exception if group does not exists" in new Fixture {
         when(groupRepository.retrieveOne(group.id.get)).thenReturn(Future.successful(None))

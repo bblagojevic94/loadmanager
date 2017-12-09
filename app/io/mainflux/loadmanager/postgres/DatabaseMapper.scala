@@ -1,4 +1,4 @@
-package io.mainflux.loadmanager.persistence
+package io.mainflux.loadmanager.postgres
 
 import java.sql.Timestamp
 import java.time.LocalDateTime

@@ -1,6 +1,6 @@
-GET     /health                                             io.mainflux.loadmanager.controllers.Application.health()
+GET     /health                                             io.mainflux.loadmanager.controllers.ServiceInfo.health()
 
-GET     /docs                                               io.mainflux.loadmanager.controllers.Application.docs()
+GET     /docs                                               io.mainflux.loadmanager.controllers.ServiceInfo.docs()
 
 GET     /groups                                             io.mainflux.loadmanager.controllers.Groups.retrieveAll()
 POST    /groups                                             io.mainflux.loadmanager.controllers.Groups.create()

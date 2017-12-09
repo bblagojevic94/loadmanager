@@ -5,14 +5,13 @@ import javax.inject.Inject
 import io.mainflux.loadmanager.engine.{EntityNotFound, MicrogridRepository}
 import io.mainflux.loadmanager.hateoas.{MicrogridCollectionResponse, MicrogridRequest, MicrogridResponse}
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 
 import scala.concurrent.ExecutionContext
 
-class Microgrids @Inject()(microgridRepository: MicrogridRepository)(implicit val ec: ExecutionContext)
-    extends ApiEndpoint {
-
-  import io.mainflux.loadmanager.hateoas.JsonFormat._
+final class Microgrids @Inject()(microgridRepository: MicrogridRepository, cc: ControllerComponents)(
+    implicit val ec: ExecutionContext
+) extends ApiEndpoint(cc) {
 
   def create: Action[JsValue] = Action.async(JsonApiParser.json) { implicit request =>
     request.body

@@ -1,9 +1,9 @@
-package io.mainflux.loadmanager.persistence
+package io.mainflux.loadmanager.postgres
 
 import java.time.LocalDateTime
 
 import io.mainflux.loadmanager.engine._
-import io.mainflux.loadmanager.persistence.DatabaseMapper._
+import io.mainflux.loadmanager.postgres.DatabaseMapper._
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ProvenShape, TableQuery}
 

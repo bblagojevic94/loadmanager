@@ -2,7 +2,7 @@ package io.mainflux.loadmanager.hateoas
 
 import play.api.libs.json.{Json, OFormat}
 
-object JsonFormat {
+trait JsonFormat {
 
   implicit val links: OFormat[Links]            = Json.format[Links]
   implicit val meta: OFormat[Meta]              = Json.format[Meta]

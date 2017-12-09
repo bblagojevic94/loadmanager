@@ -1,26 +1,59 @@
 import Dependencies._
 
-lazy val buildSettings = Seq(
+lazy val commonSettings = Seq(
   organization := "io.mainflux",
-  name := "loadmanager",
-  version := "1.0.0",
-  scalaVersion := "2.11.11"
+  organizationName := "Mainflux",
+  scalacOptions ++= Seq(
+    "-deprecation",
+    "-encoding", "UTF-8",
+    "-feature",
+    "-language:existentials",
+    "-language:higherKinds",
+    "-language:implicitConversions",
+    "-unchecked",
+    "-Xlint",
+    "-Yno-adapted-args",
+    "-Ywarn-dead-code",
+    "-Ywarn-numeric-widen",
+    "-Ywarn-value-discard",
+    "-Xfuture",
+    "-Ywarn-unused-import"
+  ),
+  scalaVersion := "2.11.11",
+  version := "1.0.0-SNAPSHOT"
 )
 
-lazy val coreLibs =
-  Seq(ws, postgres, slick, slickEvolutions, akkaActor, akkaLogging, logback, webJarsPlay, swagger)
-lazy val xmlLibs  = Seq(scalaXml, scalaParser, dispatch)
-lazy val testLibs = Seq(scalaTest, mockito, akkaTestKit).map(_ % Test)
-
 lazy val root = (project in file("."))
-  .enablePlugins(PlayScala, ScalaxbPlugin)
-  .settings(buildSettings: _*)
+  .enablePlugins(PlayScala)
   .settings(
-    libraryDependencies ++= (coreLibs ++ xmlLibs ++ testLibs)
-  )
-  .settings(
-    scalaxbDispatchVersion in (Compile, scalaxb) := dispatch.revision,
-    scalaxbPackageName in (Compile, scalaxb) := "generated",
-    scalaxbXsdSource in (Compile, scalaxb) := baseDirectory.value / "conf" / "osgp" / "xsd",
-    scalaxbWsdlSource in (Compile, scalaxb) := baseDirectory.value / "conf" / "osgp" / "wsdl"
+    commonSettings,
+    name := "loadmanager",
+
+    libraryDependencies ++= {
+      val core = Seq(
+        guice,
+        logback,
+        postgres,
+        slick,
+        slickEvolutions,
+        swagger,
+        webJarsPlay
+      )
+
+      val testing = Seq(akkaTestKit, mockito, scalaTest).map(_ % Test)
+
+      core ++ testing
+    },
+
+    wartremoverExcluded := {
+      val root = crossTarget.value
+      Seq(
+        root / "routes" / "main" / "router" / "Routes.scala",
+        root / "routes" / "main" / "router" / "RoutesPrefix.scala",
+        root / "routes" / "main" / "controllers" / "ReverseRoutes.scala",
+        root / "routes" / "main" / "controllers" / "javascript" / "JavaScriptReverseRoutes.scala"
+      )
+    },
+
+    wartremoverWarnings ++= Warts.unsafe
   )

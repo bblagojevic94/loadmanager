@@ -3,7 +3,6 @@ package io.mainflux.loadmanager.postgres
 import javax.inject.Inject
 
 import io.mainflux.loadmanager.engine.{Subscription, SubscriptionGroup, SubscriptionRepository}
-import io.mainflux.loadmanager.persistence.DatabaseSchema
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
