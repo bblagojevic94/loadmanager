@@ -1,6 +1,5 @@
 import javax.inject.Singleton
 
-import io.mainflux.loadmanager.controllers.JsonApiParser
 import io.mainflux.loadmanager.engine.EntityNotFound
 import io.mainflux.loadmanager.hateoas.{Error, ErrorResponse, JsonFormat}
 import play.api.http.HttpErrorHandler
@@ -12,6 +11,7 @@ import scala.concurrent.Future
 
 @Singleton
 final class ErrorHandler extends HttpErrorHandler with JsonFormat {
+
   def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] =
     Future.successful(Status(statusCode)(createResponse(statusCode, message)))
 
@@ -22,7 +22,7 @@ final class ErrorHandler extends HttpErrorHandler with JsonFormat {
       case _                           => InternalServerError(createResponse(500, exception.getMessage))
     }
 
-    Future.successful(response.as(JsonApiParser.JsonApiContentType))
+    Future.successful(response.as(ContentType))
   }
 
   private def createResponse(code: Int, message: String) = {

@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import io.mainflux.loadmanager.engine._
 import io.mainflux.loadmanager.hateoas._
+import play.api.http.HttpErrorHandler
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 
@@ -11,10 +12,11 @@ import scala.concurrent.ExecutionContext
 
 final class Subscriptions @Inject()(subscriptionService: SubscriptionService,
                                     groupRepository: GroupRepository,
-                                    cc: ControllerComponents)(implicit val ec: ExecutionContext)
-    extends ApiEndpoint(cc) {
+                                    cc: ControllerComponents,
+                                    eh: HttpErrorHandler)(implicit val ec: ExecutionContext)
+    extends ApiEndpoint(cc, eh) {
 
-  def create: Action[JsValue] = Action.async(JsonApiParser.json) { implicit request =>
+  def create: Action[JsValue] = Action.async(parseJsonAPI) { implicit request =>
     request.body
       .validate[SubscriptionRequest]
       .fold(
@@ -22,21 +24,21 @@ final class Subscriptions @Inject()(subscriptionService: SubscriptionService,
         body =>
           subscriptionService.create(body.data.toDomain).map { savedSubscription =>
             Created(Json.toJson(SubscriptionResponse.fromDomain(savedSubscription)))
-              .as(JsonApiParser.JsonApiContentType)
+              .as(ContentType)
         }
       )
   }
 
   def retrieveOne(id: Long): Action[AnyContent] = Action.async {
     subscriptionService.retrieveOne(id).map { subscription =>
-      Ok(Json.toJson(SubscriptionResponse.fromDomain(subscription))).as(JsonApiParser.JsonApiContentType)
+      Ok(Json.toJson(SubscriptionResponse.fromDomain(subscription))).as(ContentType)
     }
   }
 
   def retrieveAll: Action[AnyContent] = Action.async {
     subscriptionService.retrieveAll.map { subscriptions =>
       Ok(Json.toJson(SubscriptionCollectionResponse.fromDomain(subscriptions)))
-        .as(JsonApiParser.JsonApiContentType)
+        .as(ContentType)
     }
   }
 
@@ -46,11 +48,11 @@ final class Subscriptions @Inject()(subscriptionService: SubscriptionService,
 
   def retrieveSubscriberGroups(subscriberId: Long): Action[AnyContent] = Action.async {
     subscriptionService.retrieveSubscriberGroups(subscriberId).map { groups =>
-      Ok(Json.toJson(GroupIdentifiers.fromDomain(groups))).as(JsonApiParser.JsonApiContentType)
+      Ok(Json.toJson(GroupIdentifiers.fromDomain(groups))).as(ContentType)
     }
   }
 
-  def subscribeOnGroups(subscriberId: Long): Action[JsValue] = Action.async(JsonApiParser.json) {
+  def subscribeOnGroups(subscriberId: Long): Action[JsValue] = Action.async(parseJsonAPI) {
     implicit request =>
       request.body
         .validate[GroupIdentifiers]
@@ -60,7 +62,7 @@ final class Subscriptions @Inject()(subscriptionService: SubscriptionService,
         )
   }
 
-  def unsubscribeFromGroups(subscriberId: Long): Action[JsValue] = Action.async(JsonApiParser.json) {
+  def unsubscribeFromGroups(subscriberId: Long): Action[JsValue] = Action.async(parseJsonAPI) {
     implicit request =>
       request.body
         .validate[GroupIdentifiers]

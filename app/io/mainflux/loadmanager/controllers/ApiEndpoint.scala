@@ -1,13 +1,17 @@
 package io.mainflux.loadmanager.controllers
 
 import io.mainflux.loadmanager.hateoas.{Error, ErrorResponse, JsonFormat}
+import play.api.http.HttpErrorHandler
 import play.api.libs.json.{JsPath, JsValue, Json, JsonValidationError}
-import play.api.mvc.{AbstractController, ControllerComponents}
+import play.api.mvc.{RequestHeader, _}
 
 import scala.concurrent.Future
 import scala.util.Try
 
-abstract class ApiEndpoint(cc: ControllerComponents) extends AbstractController(cc) with JsonFormat {
+abstract class ApiEndpoint(cc: ControllerComponents, errorHandler: HttpErrorHandler)
+    extends AbstractController(cc)
+    with JsonFormat
+    with BodyParserUtils {
   protected def createErrorResponse(errors: Seq[(JsPath, Seq[JsonValidationError])]): Future[Nothing] = {
     val invalidProperty = Try(errors.head._1.path.last.toString.tail).toOption
 
@@ -19,6 +23,16 @@ abstract class ApiEndpoint(cc: ControllerComponents) extends AbstractController(
 
     Future.failed(new IllegalArgumentException(s"Malformed JSON provided. $detail"))
   }
+
+  private def createBadResult(msg: String): RequestHeader => Future[Result] = { request =>
+    errorHandler.onServerError(request, new IllegalArgumentException(msg))
+  }
+
+  protected def parseJsonAPI: BodyParser[JsValue] = when(
+    _.contentType.exists(m => m.equals(ContentType)),
+    cc.parsers.tolerantJson,
+    createBadResult(s"Expecting $ContentType body")
+  )
 
   val NotSupportedResponse: JsValue = {
     val response = ErrorResponse(

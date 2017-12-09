@@ -56,12 +56,7 @@ class Subscriptions @Inject()(groupRepository: GroupRepository,
       }
     } yield (microgrids, subscriptions)
 
-    initValues
-      .map {
-        case (microgrids, subscriptions) =>
-          InitializationDone(State(microgrids, subscriptions))
-      }
-      .pipeTo(context.self)
+    initValues.map { case (mgs, subs) => State(mgs, subs) }.pipeTo(context.self)
   }
 
   override def receive: Receive = uninitialized

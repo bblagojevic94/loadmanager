@@ -4,6 +4,8 @@ import play.api.libs.json.{Json, OFormat}
 
 trait JsonFormat {
 
+  val ContentType: String = "application/vnd.api+json"
+
   implicit val links: OFormat[Links]            = Json.format[Links]
   implicit val meta: OFormat[Meta]              = Json.format[Meta]
   implicit val error: OFormat[Error]            = Json.format[Error]
