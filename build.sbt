@@ -20,7 +20,7 @@ lazy val commonSettings = Seq(
     "-Ywarn-unused-import"
   ),
   scalaVersion := "2.11.11",
-  version := "1.0.0-SNAPSHOT"
+  version := "0.1.0"
 )
 
 lazy val root = (project in file("."))
@@ -33,6 +33,7 @@ lazy val root = (project in file("."))
       val core = Seq(
         guice,
         logback,
+        logstashEncoder,
         postgres,
         slick,
         slickEvolutions,
@@ -55,5 +56,9 @@ lazy val root = (project in file("."))
       )
     },
 
-    wartremoverWarnings ++= Warts.unsafe
+    wartremoverWarnings ++= Warts.unsafe,
+
+    javaOptions in Universal ++= Seq(
+      "-Dlogger.resource=logback-prod.xml"
+    )
   )
