@@ -7,7 +7,7 @@ object Dependencies {
     val logstashEncoder = "4.11"
     val mockito         = "2.+"
     val postgres        = "9.4.1207"
-    val scalaTest       = "2.0.0"
+    val scalaTest       = "3.1.2"
     val slick           = "3.0.0"
     val swagger         = "3.2.2"
     val webJars         = "2.6.1"
