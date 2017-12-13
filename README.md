@@ -12,7 +12,11 @@ The service is configured using the following environment variables:
 | Variable     | Description                                             | Required |
 |--------------|---------------------------------------------------------|----------|
 | APP_SECRET   | Secret key used by Play framework, defaults to 'secret' | No       |
-| DATABASE_URL | JDBC connection string                                  | Yes      |
+| DB_NAME      | Name of the database the service will use               | Yes      |
+| DB_HOST      | Database instance host                                  | Yes      |
+| DB_PORT      | Database instance port                                  | Yes      |
+| DB_USER      | Database user used by the service                       | Yes      |
+| DB_PASS      | Database password used by the service                   | Yes      |
 
 ## Usage
 
@@ -32,7 +36,11 @@ services:
     ports:
       - "9000:9000"
     environment:
-      DATABASE_URL: postgres://mainflux:mainflux@postgres/load-manager
+      DB_NAME: load-manager
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: mainflux
+      DB_PASS: mainflux
 
   postgres:
     image: postgres:9.6-alpine
@@ -56,5 +64,5 @@ the interactive API documentation.
 
 [compose-url]: https://docs.docker.com/compose/overview/
 [docker-url]: https://docker.com
-[travis-img]: https://travis-ci.org/MainfluxLabs/loadmanager.svg?branch=master
+[travis-img]: https://travis-ci.org/MainfluxLabs/loadmanager.svg?branch=dev
 [travis-url]: https://travis-ci.org/MainfluxLabs/loadmanager

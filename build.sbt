@@ -20,7 +20,7 @@ lazy val commonSettings = Seq(
     "-Ywarn-unused-import"
   ),
   scalaVersion := "2.12.2",
-  version := "0.1.0"
+  version := "0.1.1"
 )
 
 lazy val root = (project in file("."))
@@ -28,6 +28,8 @@ lazy val root = (project in file("."))
   .settings(
     commonSettings,
     name := "loadmanager",
+
+    javaOptions in Universal ++= Seq("-Dlogger.resource=logback-prod.xml"),
 
     libraryDependencies ++= {
       val core = Seq(
@@ -56,9 +58,5 @@ lazy val root = (project in file("."))
       )
     },
 
-    wartremoverWarnings ++= Warts.unsafe,
-
-    javaOptions in Universal ++= Seq(
-      "-Dlogger.resource=logback-prod.xml"
-    )
+    wartremoverWarnings ++= Warts.unsafe
   )
