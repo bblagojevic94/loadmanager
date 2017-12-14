@@ -29,12 +29,12 @@ CREATE TABLE groups_microgrids (
 );
 
 CREATE TABLE subscribers_groups (
-  subscriber_id     BIGSERIAL NOT NULL,
+  subscription_id   BIGSERIAL NOT NULL,
   group_id          BIGSERIAL NOT NULL,
-
-  CONSTRAINT pk_sg                                  PRIMARY KEY (subscriber_id, group_id),
-  CONSTRAINT fk_sg_subs                             FOREIGN KEY (subscriber_id) REFERENCES subscribers(id) ON DELETE CASCADE,
-  CONSTRAINT fk_sg_groups                           FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+  created_at        TIMESTAMP NOT NULL,
+  CONSTRAINT pk_subscribers_groups                  PRIMARY KEY (subscription_id, group_id),
+  CONSTRAINT fk_subscribers_groups_subscribers_01   FOREIGN KEY (subscription_id) REFERENCES subscribers(id),
+  CONSTRAINT fk_subscribers_groups_groups_02        FOREIGN KEY (group_id) REFERENCES groups(id)
 );
 
 # --- !Downs
