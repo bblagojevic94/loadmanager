@@ -8,7 +8,10 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final class Microgrids @Inject()(cc: ControllerComponents, eh: HttpErrorHandler)(implicit val ec: ExecutionContext)
+final class Microgrids @Inject()(
+    cc: ControllerComponents,
+    eh: HttpErrorHandler
+)(implicit val ec: ExecutionContext)
     extends ApiEndpoint(cc, eh) {
 
   def create: Action[JsValue] = Action.async(parseJsonAPI) { implicit request =>

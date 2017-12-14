@@ -11,7 +11,6 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import scala.concurrent.{ExecutionContext, Future}
 
 final class Subscribers @Inject()(
-    subscriberRepository: SubscriberRepository,
     cc: ControllerComponents,
     eh: HttpErrorHandler
 )(implicit val ec: ExecutionContext)
@@ -67,6 +66,7 @@ final class Subscribers @Inject()(
       }
   }
 
+<<<<<<< HEAD
   def subscribe(subscriberId: Long): Action[JsValue] = Action.async(parseJsonAPI) {
     implicit request =>
       request.body
@@ -82,8 +82,17 @@ final class Subscribers @Inject()(
                 Future.failed(EntityNotFound(s"Subscriber with id $subscriberId does not exist."))
           }
         )
+||||||| merged common ancestors
+  def subscribe(subscriberId: Long): Action[JsValue] = Action.async(parseJsonAPI) { implicit request =>
+    Future.successful(NoContent)
+=======
+  def subscribe(subscriberId: Long): Action[JsValue] = Action.async(parseJsonAPI) {
+    implicit request =>
+      Future.successful(NoContent)
+>>>>>>> Implement basic DAO layer
   }
 
+<<<<<<< HEAD
   def unsubscribe(subscriberId: Long): Action[JsValue] = Action.async(parseJsonAPI) {
     implicit request =>
       request.body
@@ -99,6 +108,14 @@ final class Subscribers @Inject()(
                 Future.failed(EntityNotFound(s"Subscriber with id $subscriberId does not exist."))
           }
         )
+||||||| merged common ancestors
+  def unsubscribe(subscriberId: Long): Action[JsValue] = Action.async(parseJsonAPI) { implicit request =>
+    Future.successful(NoContent)
+=======
+  def unsubscribe(subscriberId: Long): Action[JsValue] = Action.async(parseJsonAPI) {
+    implicit request =>
+      Future.successful(NoContent)
+>>>>>>> Implement basic DAO layer
   }
 
   def updateGroups(subscriberId: Long): Action[AnyContent] = Action {

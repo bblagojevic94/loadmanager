@@ -8,7 +8,10 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final class Groups @Inject()(cc: ControllerComponents, eh: HttpErrorHandler)(implicit val ec: ExecutionContext)
+final class Groups @Inject()(
+    cc: ControllerComponents,
+    eh: HttpErrorHandler
+)(implicit val ec: ExecutionContext)
     extends ApiEndpoint(cc, eh) {
 
   def create: Action[JsValue] = Action.async(parseJsonAPI) { implicit request =>
@@ -31,12 +34,14 @@ final class Groups @Inject()(cc: ControllerComponents, eh: HttpErrorHandler)(imp
     Future.successful(Ok("").as(ContentType))
   }
 
-  def addMicrogrids(groupId: Long): Action[JsValue] = Action.async(parseJsonAPI) { implicit request =>
-    Future.successful(NoContent)
+  def addMicrogrids(groupId: Long): Action[JsValue] = Action.async(parseJsonAPI) {
+    implicit request =>
+      Future.successful(NoContent)
   }
 
-  def removeMicrogrids(groupId: Long): Action[JsValue] = Action.async(parseJsonAPI) { implicit request =>
-    Future.successful(NoContent)
+  def removeMicrogrids(groupId: Long): Action[JsValue] = Action.async(parseJsonAPI) {
+    implicit request =>
+      Future.successful(NoContent)
   }
 
   def updateMicrogrids(groupId: Long) = Action {

@@ -1,3 +1,5 @@
 package io.mainflux.loadmanager.engine
 
-final case class Subscriber(info: SubscriberInfo, groups: Set[Long])
+import java.time.LocalDateTime
+
+final case class Subscriber(id: Option[Long], callback: String, cretedAt: LocalDateTime)

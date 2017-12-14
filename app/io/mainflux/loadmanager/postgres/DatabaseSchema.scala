@@ -3,7 +3,7 @@ package io.mainflux.loadmanager.postgres
 import java.sql.Timestamp
 import java.time.LocalDateTime
 
-import io.mainflux.loadmanager.engine.{GroupInfo, MicrogridInfo, PlatformType, SubscriberInfo}
+import io.mainflux.loadmanager.engine.{Group, Microgrid, PlatformType, Subscriber}
 import slick.ast.BaseTypedType
 import slick.jdbc.JdbcType
 import slick.jdbc.PostgresProfile.api._
@@ -20,9 +20,9 @@ trait DatabaseSchema {
   val groups: TableQuery[Groups]           = TableQuery[Groups]
   val subscribers: TableQuery[Subscribers] = TableQuery[Subscribers]
 
-  final class Microgrids(tag: Tag) extends Table[MicrogridInfo](tag, "microgrids") {
-    def * : ProvenShape[MicrogridInfo] =
-      (id.?, url, platform, organisationId, createdAt) <> (MicrogridInfo.tupled, MicrogridInfo.unapply)
+  final class Microgrids(tag: Tag) extends Table[Microgrid](tag, "microgrids") {
+    def * : ProvenShape[Microgrid] =
+      (id.?, url, platform, organisationId, createdAt) <> (Microgrid.tupled, Microgrid.unapply)
 
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
@@ -35,8 +35,8 @@ trait DatabaseSchema {
     def createdAt: Rep[LocalDateTime] = column[LocalDateTime]("created_at")
   }
 
-  final class Groups(tag: Tag) extends Table[GroupInfo](tag, "groups") {
-    def * : ProvenShape[GroupInfo] = (id.?, name, createdAt) <> (GroupInfo.tupled, GroupInfo.unapply)
+  final class Groups(tag: Tag) extends Table[Group](tag, "groups") {
+    def * : ProvenShape[Group] = (id.?, name, createdAt) <> (Group.tupled, Group.unapply)
 
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
@@ -45,8 +45,9 @@ trait DatabaseSchema {
     def createdAt: Rep[LocalDateTime] = column[LocalDateTime]("created_at")
   }
 
-  final class Subscribers(tag: Tag) extends Table[SubscriberInfo](tag, "subscribers") {
-    def * : ProvenShape[SubscriberInfo] = (id.?, callback, createdAt) <> (SubscriberInfo.tupled, SubscriberInfo.unapply)
+  final class Subscribers(tag: Tag) extends Table[Subscriber](tag, "subscribers") {
+    def * : ProvenShape[Subscriber] =
+      (id.?, callback, createdAt) <> (Subscriber.tupled, Subscriber.unapply)
 
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
