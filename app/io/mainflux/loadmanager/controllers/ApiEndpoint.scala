@@ -32,8 +32,7 @@ abstract class ApiEndpoint(cc: ControllerComponents, errorHandler: HttpErrorHand
   val NotSupportedResponse: JsValue = {
     val er = ErrorResponse(
       meta = Meta(LocalDateTime.now().toString),
-      errors =
-        Seq(Error("403", "Server does not support full replacement of a to-many relationship."))
+      errors = Seq(Error("403", "Server does not support full replacement of a to-many relationship."))
     )
 
     Json.toJson(er)
