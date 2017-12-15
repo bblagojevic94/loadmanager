@@ -1,3 +1,3 @@
 package io.mainflux.loadmanager.engine
 
-trait SubscriberRepository extends Repository[Subscriber] {}
+trait SubscriberRepository extends Repository[SubscriberInfo] {}

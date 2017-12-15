@@ -2,7 +2,7 @@ package io.mainflux.loadmanager.postgres
 
 import javax.inject.Inject
 
-import io.mainflux.loadmanager.engine.{Group, GroupRepository}
+import io.mainflux.loadmanager.engine.{Group, GroupInfo, GroupRepository}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
@@ -16,13 +16,42 @@ final class GroupsDAO @Inject()(
     with HasDatabaseConfigProvider[JdbcProfile]
     with DatabaseSchema {
 
-  def save(group: Group): Future[Long] =
-    db.run(groups.returning(groups.map(_.id)) += group)
+  def save(group: Group): Future[Group] = {
+    val groupRepo = groups.returning(groups.map(_.id)).into((g, id) => g.copy(id = Some(id)))
 
-  def retrieveAll: Future[Seq[Group]] = db.run(groups.result)
+    val actions = for {
+      sg <- groupRepo += group.info
+      pairs = group.microgrids.map(id => (sg.id.getOrElse(0L), id)).toSeq
+      _ <- groupedGrids ++= pairs
+    } yield group.copy(info = sg)
 
-  def retrieveOne(id: Long): Future[Option[Group]] =
-    db.run(groups.filter(_.id === id).result.headOption)
+    db.run(actions.transactionally)
+  }
+
+  def retrieveAll: Future[Seq[Group]] = {
+    val action = for {
+      g  <- groups
+      gs <- groupedGrids if g.id === gs.groupId
+    } yield (g, gs.microgridId)
+
+    db.run(action.result).map(buildGroups)
+  }
+
+  def retrieveOne(id: Long): Future[Option[Group]] = {
+    val action = for {
+      g  <- groups.filter(_.id === id)
+      gs <- groupedGrids
+    } yield (g, gs.microgridId)
+
+    db.run(action.result).map(buildGroups).map(_.headOption)
+  }
+
+  private def buildGroups(rs: Seq[(GroupInfo, Long)]) =
+    rs.groupBy(_._1)
+      .map {
+        case (info, vals) => Group(info, vals.map(_._2).toSet)
+      }
+      .toSeq
 
   def remove(id: Long): Future[Int] = db.run(groups.filter(_.id === id).delete)
 }

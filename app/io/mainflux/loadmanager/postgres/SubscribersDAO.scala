@@ -2,7 +2,7 @@ package io.mainflux.loadmanager.postgres
 
 import javax.inject.Inject
 
-import io.mainflux.loadmanager.engine.{Subscriber, SubscriberRepository}
+import io.mainflux.loadmanager.engine.{SubscriberInfo, SubscriberRepository}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
@@ -16,12 +16,11 @@ final class SubscribersDAO @Inject()(
     with HasDatabaseConfigProvider[JdbcProfile]
     with DatabaseSchema {
 
-  def save(subscriber: Subscriber): Future[Long] =
-    db.run(subscribers.returning(subscribers.map(_.id)) += subscriber)
+  def save(subscriber: SubscriberInfo): Future[SubscriberInfo] = ???
 
-  def retrieveAll: Future[Seq[Subscriber]] = db.run(subscribers.result)
+  def retrieveAll: Future[Seq[SubscriberInfo]] = db.run(subscribers.result)
 
-  def retrieveOne(id: Long): Future[Option[Subscriber]] =
+  def retrieveOne(id: Long): Future[Option[SubscriberInfo]] =
     db.run(subscribers.filter(_.id === id).result.headOption)
 
   def remove(id: Long): Future[Int] = db.run(subscribers.filter(_.id === id).delete)

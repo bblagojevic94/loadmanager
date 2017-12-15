@@ -23,17 +23,17 @@ CREATE TABLE groups_microgrids (
   group_id       BIGSERIAL NOT NULL,
   microgrid_id   BIGSERIAL NOT NULL,
 
-  CONSTRAINT pk_gm                                PRIMARY KEY (group_id, microgrid_id),
-  CONSTRAINT fk_gm_groups                         FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
-  CONSTRAINT fk_gm_grids                          FOREIGN KEY (microgrid_id) REFERENCES microgrids(id) ON DELETE CASCADE
+  CONSTRAINT pk_groups_microgrids                 PRIMARY KEY (group_id, microgrid_id),
+  CONSTRAINT fk_groups_microgrids_groups_01       FOREIGN KEY (group_id) REFERENCES groups(id),
+  CONSTRAINT fk_groups_microgrids_microgrids_02   FOREIGN KEY (microgrid_id) REFERENCES microgrids(id)
 );
 
 CREATE TABLE subscribers_groups (
-  subscription_id   BIGSERIAL NOT NULL,
+  subscriber_id     BIGSERIAL NOT NULL,
   group_id          BIGSERIAL NOT NULL,
-  created_at        TIMESTAMP NOT NULL,
-  CONSTRAINT pk_subscribers_groups                  PRIMARY KEY (subscription_id, group_id),
-  CONSTRAINT fk_subscribers_groups_subscribers_01   FOREIGN KEY (subscription_id) REFERENCES subscribers(id),
+
+  CONSTRAINT pk_subscribers_groups                  PRIMARY KEY (subscriber_id, group_id),
+  CONSTRAINT fk_subscribers_groups_subscribers_01   FOREIGN KEY (subscriber_id) REFERENCES subscribers(id),
   CONSTRAINT fk_subscribers_groups_groups_02        FOREIGN KEY (group_id) REFERENCES groups(id)
 );
 

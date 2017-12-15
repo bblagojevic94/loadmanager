@@ -16,8 +16,10 @@ final class MicrogridsDAO @Inject()(
     with HasDatabaseConfigProvider[JdbcProfile]
     with DatabaseSchema {
 
-  def save(microgrid: Microgrid): Future[Long] =
-    db.run(microgrids.returning(microgrids.map(_.id)) += microgrid)
+  def save(microgrid: Microgrid): Future[Microgrid] = {
+    val mgRepo = microgrids.returning(microgrids.map(_.id)).into((mg, id) => mg.copy(id = Some(id)))
+    db.run(mgRepo += microgrid)
+  }
 
   def retrieveAll: Future[Seq[Microgrid]] = db.run(microgrids.result)
 
