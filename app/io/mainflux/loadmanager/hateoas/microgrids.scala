@@ -2,8 +2,8 @@ package io.mainflux.loadmanager.hateoas
 
 import java.time.LocalDateTime
 
+import io.mainflux.loadmanager.controllers.routes
 import io.mainflux.loadmanager.engine.{Microgrid, PlatformType}
-import org.apache.commons.lang3.StringUtils.EMPTY
 
 final case class MicrogridCollectionResponse(data: Seq[MicrogridResponseData])
 
@@ -22,12 +22,10 @@ object MicrogridResponseData {
     val attributes =
       MicrogridAttributes(microgrid.url, microgrid.platform.toString, microgrid.organisationId)
 
-    MicrogridResponseData(
-      id = microgrid.id,
-      `type` = MicrogridType,
-      attributes = attributes,
-      links = Links(s"/$MicrogridType/${microgrid.id.map(_.toString).getOrElse(EMPTY)}")
-    )
+    MicrogridResponseData(microgrid.id,
+                          MicrogridType,
+                          attributes,
+                          Links(microgrid.id.fold("")(id => routes.Microgrids.retrieveOne(id).url)))
   }
 }
 
@@ -35,13 +33,11 @@ final case class MicrogridRequest(data: MicrogridRequestData)
 
 final case class MicrogridRequestData(`type`: String, attributes: MicrogridAttributes) {
   def toDomain: Microgrid =
-    Microgrid(
-      id = None,
-      url = attributes.url,
-      platform = PlatformType.valueOf(attributes.platformType.toUpperCase),
-      organisationId = attributes.organisationId,
-      createdAt = LocalDateTime.now()
-    )
+    Microgrid(None,
+              attributes.url,
+              PlatformType.valueOf(attributes.platformType.toUpperCase),
+              attributes.organisationId,
+              LocalDateTime.now())
 }
 
 final case class MicrogridAttributes(url: String, platformType: String, organisationId: String)
@@ -61,7 +57,7 @@ final case class MicrogridIdentifiers(data: Set[MicrogridIdentifier]) {
 
 object MicrogridIdentifiers {
   def fromDomain(microgrids: Set[Long]): MicrogridIdentifiers =
-    MicrogridIdentifiers(microgrids.map { microgridId =>
-      MicrogridIdentifier(MicrogridType, microgridId)
+    MicrogridIdentifiers(microgrids.map { id =>
+      MicrogridIdentifier(MicrogridType, id)
     })
 }

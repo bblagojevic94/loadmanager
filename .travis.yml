@@ -8,12 +8,6 @@ language: scala
 scala:
   - 2.12.2
 
-env:
-  - DATABASE_URL=dummy
-
-script:
-  - sbt ++$TRAVIS_SCALA_VERSION test
-
 deploy:
   - provider: script
     script: scripts/docker.sh

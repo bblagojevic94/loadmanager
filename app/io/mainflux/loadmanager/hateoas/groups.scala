@@ -2,14 +2,14 @@ package io.mainflux.loadmanager.hateoas
 
 import java.time.LocalDateTime
 
+import io.mainflux.loadmanager.controllers.routes
 import io.mainflux.loadmanager.engine.{Group, GroupInfo}
-import org.apache.commons.lang3.StringUtils.EMPTY
 
 final case class GroupCollectionResponse(data: Seq[GroupResponseData])
 
 object GroupCollectionResponse {
   def fromDomain(groups: Seq[Group]): GroupCollectionResponse = {
-    val data: Seq[GroupResponseData] = groups.map(GroupResponseData.fromDomain)
+    val data = groups.map(GroupResponseData.fromDomain)
     GroupCollectionResponse(data)
   }
 }
@@ -22,21 +22,19 @@ final case class GroupResponseData(`type`: String,
 
 object GroupResponseData {
   def fromDomain(group: Group): GroupResponseData = {
-    val groupLink: String = s"/$GroupType/${group.info.id.map(_.toString).getOrElse(EMPTY)}"
-
     val relationships =
       GroupRelationshipsResponse(
         MicrogridsRelationships(
-          links = Links(s"/$groupLink/relationships/$MicrogridType"),
-          data = group.microgrids.map(mg => MicrogridIdentifier(MicrogridType, mg))
+          Links(group.info.id.fold("")(id => routes.Groups.retrieveMicrogrids(id).url)),
+          group.microgrids.map(mg => MicrogridIdentifier(MicrogridType, mg))
         )
       )
 
     GroupResponseData(GroupType,
                       group.info.id,
-                      GroupAttributes(name = group.info.name),
+                      GroupAttributes(group.info.name),
                       relationships,
-                      Links(groupLink))
+                      Links(group.info.id.fold("")(id => routes.Groups.retrieveOne(id).url)))
   }
 }
 
@@ -52,8 +50,8 @@ final case class GroupData(`type`: String,
                            attributes: GroupAttributes,
                            relationships: GroupRelationshipsRequest) {
   def toDomain: Group =
-    Group(info = GroupInfo(id = None, name = attributes.name, createdAt = LocalDateTime.now()),
-          microgrids = relationships.microgrids.data.map(_.id))
+    Group(GroupInfo(None, attributes.name, LocalDateTime.now()),
+          relationships.microgrids.data.map(_.id))
 }
 
 final case class GroupRelationshipsRequest(microgrids: MicrogridIdentifiers)
