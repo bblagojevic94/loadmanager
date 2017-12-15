@@ -23,18 +23,18 @@ CREATE TABLE groups_microgrids (
   group_id       BIGSERIAL NOT NULL,
   microgrid_id   BIGSERIAL NOT NULL,
 
-  CONSTRAINT pk_groups_microgrids                 PRIMARY KEY (group_id, microgrid_id),
-  CONSTRAINT fk_groups_microgrids_groups_01       FOREIGN KEY (group_id) REFERENCES groups(id),
-  CONSTRAINT fk_groups_microgrids_microgrids_02   FOREIGN KEY (microgrid_id) REFERENCES microgrids(id)
+  CONSTRAINT pk_gm                                PRIMARY KEY (group_id, microgrid_id),
+  CONSTRAINT fk_gm_groups                         FOREIGN KEY (group_id) REFERENCES groups(id),
+  CONSTRAINT fk_gm_grids                          FOREIGN KEY (microgrid_id) REFERENCES microgrids(id)
 );
 
 CREATE TABLE subscribers_groups (
   subscriber_id     BIGSERIAL NOT NULL,
   group_id          BIGSERIAL NOT NULL,
 
-  CONSTRAINT pk_subscribers_groups                  PRIMARY KEY (subscriber_id, group_id),
-  CONSTRAINT fk_subscribers_groups_subscribers_01   FOREIGN KEY (subscriber_id) REFERENCES subscribers(id),
-  CONSTRAINT fk_subscribers_groups_groups_02        FOREIGN KEY (group_id) REFERENCES groups(id)
+  CONSTRAINT pk_sg                                  PRIMARY KEY (subscriber_id, group_id),
+  CONSTRAINT fk_sg_subs                             FOREIGN KEY (subscriber_id) REFERENCES subscribers(id),
+  CONSTRAINT fk_sg_groups                           FOREIGN KEY (group_id) REFERENCES groups(id)
 );
 
 # --- !Downs

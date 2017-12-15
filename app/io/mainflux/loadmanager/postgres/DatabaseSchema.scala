@@ -59,6 +59,14 @@ trait DatabaseSchema {
   final class GroupsMicrogrids(tag: Tag) extends Table[(Long, Long)](tag, "groups_microgrids") {
     def * = (groupId, microgridId)
 
+    def pk = primaryKey("pk_gm", (groupId, microgridId))
+
+    def gfk =
+      foreignKey("fk_gm_groups", groupId, groups)(_.id, onDelete = ForeignKeyAction.Cascade)
+
+    def mfk =
+      foreignKey("fk_gm_grids", microgridId, microgrids)(_.id, onDelete = ForeignKeyAction.Cascade)
+
     def groupId = column[Long]("group_id")
 
     def microgridId = column[Long]("microgrid_id")
@@ -66,6 +74,14 @@ trait DatabaseSchema {
 
   final class SubscribersGroups(tag: Tag) extends Table[(Long, Long)](tag, "subscribers_groups") {
     def * = (subscriberId, groupId)
+
+    def pk = primaryKey("pk_sg", (subscriberId, groupId))
+
+    def sfk =
+      foreignKey("fk_sg_subs", subscriberId, subscribers)(_.id, onDelete = ForeignKeyAction.Cascade)
+
+    def gfk =
+      foreignKey("fk_sg_groups", groupId, groups)(_.id, onDelete = ForeignKeyAction.Cascade)
 
     def subscriberId = column[Long]("subscriber_id")
 
