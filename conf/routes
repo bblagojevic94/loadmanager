@@ -1,6 +1,7 @@
 POST    /microgrids                                         io.mainflux.loadmanager.controllers.Microgrids.create()
 GET     /microgrids                                         io.mainflux.loadmanager.controllers.Microgrids.retrieveAll()
 GET     /microgrids/:id                                     io.mainflux.loadmanager.controllers.Microgrids.retrieveOne(id: Long)
+DELETE  /microgrids/:id                                     io.mainflux.loadmanager.controllers.Microgrids.remove(id: Long)
 
 POST    /groups                                             io.mainflux.loadmanager.controllers.Groups.create()
 GET     /groups                                             io.mainflux.loadmanager.controllers.Groups.retrieveAll()

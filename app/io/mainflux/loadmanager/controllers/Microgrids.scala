@@ -25,4 +25,8 @@ final class Microgrids @Inject()(
   def retrieveAll: Action[AnyContent] = Action.async {
     Future.successful(Ok("").as(ContentType))
   }
+
+  def remove(id: Long): Action[AnyContent] = Action.async {
+    Future.successful(NoContent)
+  }
 }
