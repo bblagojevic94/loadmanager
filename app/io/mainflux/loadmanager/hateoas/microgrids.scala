@@ -32,6 +32,8 @@ object MicrogridResponseData {
 final case class MicrogridRequest(data: MicrogridRequestData)
 
 final case class MicrogridRequestData(`type`: String, attributes: MicrogridAttributes) {
+  require(`type`.equalsIgnoreCase(MicrogridType), s"Invalid type ${`type`} provided.")
+
   def toDomain: Microgrid =
     Microgrid(None,
               attributes.url,
@@ -49,7 +51,9 @@ object MicrogridResponse {
     MicrogridResponse(MicrogridResponseData.fromDomain(microgrid))
 }
 
-final case class MicrogridIdentifier(`type`: String, id: Long)
+final case class MicrogridIdentifier(`type`: String, id: Long) {
+  require(`type`.equalsIgnoreCase(MicrogridType), s"Invalid type ${`type`} provided.")
+}
 
 final case class MicrogridIdentifiers(data: Set[MicrogridIdentifier]) {
   def toDomain: Set[Long] = data.map(_.id)

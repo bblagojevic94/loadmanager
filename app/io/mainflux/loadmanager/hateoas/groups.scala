@@ -49,12 +49,16 @@ final case class GroupRequest(data: GroupData)
 final case class GroupData(`type`: String,
                            attributes: GroupAttributes,
                            relationships: GroupRelationshipsRequest) {
+  require(`type`.equalsIgnoreCase(GroupType), s"Invalid type ${`type`} provided.")
+
   def toDomain: Group =
     Group(GroupInfo(None, attributes.name, LocalDateTime.now()),
           relationships.microgrids.data.map(_.id))
 }
 
-final case class GroupRelationshipsRequest(microgrids: MicrogridIdentifiers)
+final case class GroupRelationshipsRequest(microgrids: MicrogridIdentifiers) {
+  require(microgrids.data.nonEmpty, s"You must specify at least one microgrid.")
+}
 
 final case class GroupResponse(data: GroupResponseData)
 
@@ -63,7 +67,9 @@ object GroupResponse {
     GroupResponse(GroupResponseData.fromDomain(group))
 }
 
-final case class GroupIdentifier(`type`: String, id: Long)
+final case class GroupIdentifier(`type`: String, id: Long) {
+  require(`type`.equalsIgnoreCase(GroupType), s"Invalid type ${`type`} provided.")
+}
 
 final case class GroupIdentifiers(data: Set[GroupIdentifier]) {
   def toDomain: Set[Long] = data.map(_.id)
