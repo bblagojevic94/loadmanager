@@ -13,8 +13,10 @@ mv docker/loadmanager-* docker/loadmanager
 docker build --rm -t image docker
 docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
 
-# tag & push artifacts
-docker tag image mainflux/load-manager:latest
-docker push mainflux/load-manager:latest
-docker tag image mainflux/load-manager:$VERSION
-docker push mainflux/load-manager:$VERSION
+if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker tag image mainflux/load-manager:$VERSION
+    docker push mainflux/load-manager:$VERSION
+else
+    docker tag image mainflux/load-manager:latest
+    docker push mainflux/load-manager:latest
+fi
