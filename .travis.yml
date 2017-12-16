@@ -13,8 +13,3 @@ deploy:
     script: scripts/docker.sh
     on:
       branch: master
-
-  - provider: script
-    script: scripts/docker.sh
-    on:
-      branch: dev
