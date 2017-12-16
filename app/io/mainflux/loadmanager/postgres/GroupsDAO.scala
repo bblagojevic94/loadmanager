@@ -54,4 +54,17 @@ final class GroupsDAO @Inject()(
       .toSeq
 
   def remove(id: Long): Future[Int] = db.run(groups.filter(_.id === id).delete)
+
+  def addMicrogrids(groupId: Long, microgrids: Set[Long]): Future[Option[Int]] = {
+    val toInsert = microgrids.map(id => (groupId, id))
+    db.run(groupedGrids ++= toInsert)
+  }
+
+  def removeMicrogrids(groupId: Long, microgrids: Set[Long]): Future[Int] = {
+    val query =
+      groupedGrids.filter(gg => gg.groupId === groupId && gg.microgridId.inSet(microgrids))
+
+    db.run(query.delete)
+  }
+
 }
