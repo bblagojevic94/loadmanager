@@ -2,19 +2,20 @@ package io.mainflux.loadmanager.postgres
 
 import javax.inject.Inject
 
-import io.mainflux.loadmanager.engine.{Group, GroupInfo, GroupRepository}
+import io.mainflux.loadmanager.engine.{Group, GroupInfo, GroupRepository, Microgrid}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final class GroupsDAO @Inject()(
+final class PgGroupRepository @Inject()(
     protected val dbConfigProvider: DatabaseConfigProvider
 )(implicit ec: ExecutionContext)
     extends GroupRepository
     with HasDatabaseConfigProvider[JdbcProfile]
-    with DatabaseSchema {
+    with DatabaseSchema
+    with PgErrorHandler {
 
   def save(group: Group): Future[Group] = {
     val groupRepo = groups.returning(groups.map(_.id)).into((g, id) => g.copy(id = Some(id)))
@@ -26,6 +27,7 @@ final class GroupsDAO @Inject()(
     } yield group.copy(info = sg)
 
     db.run(actions.transactionally)
+      .recoverWith(handlePgErrors(Microgrid.toString))
   }
 
   def retrieveAll: Future[Seq[Group]] = {
@@ -57,7 +59,9 @@ final class GroupsDAO @Inject()(
 
   def addMicrogrids(groupId: Long, microgrids: Set[Long]): Future[Option[Int]] = {
     val toInsert = microgrids.map(id => (groupId, id))
+
     db.run(groupedGrids ++= toInsert)
+      .recoverWith(handlePgErrors(Microgrid.toString))
   }
 
   def removeMicrogrids(groupId: Long, microgrids: Set[Long]): Future[Int] = {

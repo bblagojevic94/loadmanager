@@ -9,7 +9,7 @@ import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.Future
 
-final class MicrogridsDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
+final class PgMicrogridRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
     extends MicrogridRepository
     with HasDatabaseConfigProvider[JdbcProfile]
     with DatabaseSchema {
