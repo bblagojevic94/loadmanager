@@ -36,10 +36,10 @@ final class Microgrids @Inject()(
   def retrieveOne(id: Long): Action[AnyContent] = Action.async {
     microgridsDAO
       .retrieveOne(id)
-      .map {
-        case Some(microgrid) =>
-          Ok(Json.toJson(MicrogridResponse.fromDomain(microgrid))).as(ContentType)
-        case _ => throw EntityNotFound(s"Microgrid with id $id does not exist.")
+      .flatMap {
+        case Some(mg) =>
+          Future.successful(Ok(Json.toJson(MicrogridResponse.fromDomain(mg))).as(ContentType))
+        case _ => Future.failed(EntityNotFound(s"Microgrid with id $id does not exist."))
       }
   }
 

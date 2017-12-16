@@ -55,4 +55,16 @@ final class SubscribersDAO @Inject()(
       .toSeq
 
   def remove(id: Long): Future[Int] = db.run(subscribers.filter(_.id === id).delete)
+
+  def subscribe(subscriberId: Long, groups: Set[Long]): Future[Option[Int]] = {
+    val toInsert = groups.map(id => (subscriberId, id))
+    db.run(subscribedGroups ++= toInsert)
+  }
+
+  def unsubscribe(subscriberId: Long, groups: Set[Long]): Future[Int] = {
+    val query =
+      subscribedGroups.filter(sg => sg.subscriberId === subscriberId && sg.groupId.inSet(groups))
+
+    db.run(query.delete)
+  }
 }
