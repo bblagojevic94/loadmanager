@@ -2,17 +2,15 @@ package io.mainflux.loadmanager.hateoas
 
 import java.time.LocalDateTime
 
+import io.mainflux.loadmanager.UnitSpec
 import io.mainflux.loadmanager.engine.{Microgrid, PlatformType}
-import org.scalatest.{FlatSpec, MustMatchers}
 
-class MicrogridSpec extends FlatSpec with MustMatchers {
-
-  "Microgrid entity" must "be created from given valid request" in {
+final class MicrogridSpec extends UnitSpec {
+  "Microgrid entity" must "be created from valid request" in {
     val attributes = MicrogridAttributes("test-url", "OSGP", "test-org")
     val request    = MicrogridRequest(MicrogridRequestData(MicrogridType, attributes))
 
-    val microgrid = request.data.toDomain
-    microgrid must have(
+    request.data.toDomain must have(
       'url (attributes.url),
       'platform (PlatformType.OSGP),
       'organisationId (attributes.organisationId)
@@ -35,7 +33,7 @@ class MicrogridSpec extends FlatSpec with MustMatchers {
     }
   }
 
-  "Microgrid response" must "be created from given model" in {
+  "Microgrid response representation" must "be created from given model" in {
     val mg       = microgrid(1)
     val response = MicrogridResponse.fromDomain(mg)
 
@@ -59,7 +57,7 @@ class MicrogridSpec extends FlatSpec with MustMatchers {
     (response.data.map(_.id) must contain).allElementsOf(microgrids.map(_.id))
   }
 
-  "Response containing microgrid identifiers" must "be created from sequence of microgrids" in {
+  "Microgrid identifiers" must "be extracted from sequence of microgrids" in {
     val ids      = (0 until 3).map(_.toLong).toSet
     val response = MicrogridIdentifiers.fromDomain(ids)
 
@@ -67,7 +65,7 @@ class MicrogridSpec extends FlatSpec with MustMatchers {
     all(response.data.map(_.`type`)) must be(MicrogridType)
   }
 
-  "Sequence of microgrid ids" must "be created from valid request" in {
+  "Sequence of microgrid identifiers" must "be extracted from valid request" in {
     val mgIds = MicrogridIdentifiers(
       (0 until 3).map(id => MicrogridIdentifier(MicrogridType, id.toLong)).toSet
     )
@@ -76,7 +74,6 @@ class MicrogridSpec extends FlatSpec with MustMatchers {
     (mgIds.data.map(_.id) must contain).allElementsOf(ids)
   }
 
-  private def microgrid(seed: Long) =
-    Microgrid(Some(seed), s"test-url-$seed", PlatformType.OSGP, s"org-$seed", LocalDateTime.now())
-
+  private def microgrid(id: Long) =
+    Microgrid(Some(id), s"test-url-$id", PlatformType.OSGP, s"org-$id", LocalDateTime.now())
 }

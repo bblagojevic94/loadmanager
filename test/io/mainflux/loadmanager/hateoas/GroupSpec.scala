@@ -2,20 +2,16 @@ package io.mainflux.loadmanager.hateoas
 
 import java.time.LocalDateTime
 
+import io.mainflux.loadmanager.UnitSpec
 import io.mainflux.loadmanager.engine.{Group, GroupInfo}
-import org.scalatest.{FlatSpec, MustMatchers}
 
-class GroupSpec extends FlatSpec with MustMatchers {
-
-  "Group entity" must "be created from given valid request" in {
+final class GroupSpec extends UnitSpec {
+  "Group entity" must "be created from valid request" in {
     val attributes = GroupAttributes("test-name")
-    val relationships = GroupRelationshipsRequest(
-      MicrogridIdentifiers(
-        Set(MicrogridIdentifier(MicrogridType, 1),
-            MicrogridIdentifier(MicrogridType, 2),
-            MicrogridIdentifier(MicrogridType, 3))
-      )
-    )
+
+    val ids           = (1 to 3).map(id => MicrogridIdentifier(MicrogridType, id))
+    val relationships = GroupRelationshipsRequest(MicrogridIdentifiers(ids.toSet))
+
     val request = GroupRequest(GroupData(GroupType, attributes, relationships))
 
     val group = request.data.toDomain
@@ -39,7 +35,7 @@ class GroupSpec extends FlatSpec with MustMatchers {
     }
   }
 
-  "Group request" must "be created from group entity" in {
+  "Group response representation" must "be created from group entity" in {
     val g        = group(1)
     val response = GroupResponse.fromDomain(g)
 
@@ -56,7 +52,7 @@ class GroupSpec extends FlatSpec with MustMatchers {
     response.data.links.self must be(s"/$GroupType/1")
   }
 
-  "Group collection response" must "be created from given sequence of groups" in {
+  "Group collection response" must "be created from sequence of groups" in {
     val groups   = (0 until 3).map(_.toLong).map(group)
     val response = GroupCollectionResponse.fromDomain(groups)
 
@@ -64,7 +60,7 @@ class GroupSpec extends FlatSpec with MustMatchers {
     response.data.foreach(_.relationships.microgrids.data.size must be(2))
   }
 
-  "Response containing group identifiers" must "be created from given sequence of groups" in {
+  "Group identifiers" must "be extracted from sequence of groups" in {
     val ids      = (0 until 3).map(_.toLong).toSet
     val response = GroupIdentifiers.fromDomain(ids)
 
@@ -72,7 +68,7 @@ class GroupSpec extends FlatSpec with MustMatchers {
     all(response.data.map(_.`type`)) must be(GroupType)
   }
 
-  "Sequence of group ids" must "be created from valid request" in {
+  "Sequence of group identifiers" must "be extracted from valid request" in {
     val gIds = GroupIdentifiers(
       (0 until 3).map(id => GroupIdentifier(GroupType, id.toLong)).toSet
     )
@@ -81,8 +77,10 @@ class GroupSpec extends FlatSpec with MustMatchers {
     (gIds.data.map(_.id) must contain).allElementsOf(ids)
   }
 
-  private def group(seed: Long) =
-    Group(GroupInfo(Some(seed), s"name-$seed", LocalDateTime.now()),
-          (0 until 2).map(_.toLong).toSet)
+  private def group(id: Long) = {
+    val info  = GroupInfo(Some(id), s"name-$id", LocalDateTime.now())
+    val grids = (0 until 2).map(_.toLong).toSet
 
+    Group(info, grids)
+  }
 }

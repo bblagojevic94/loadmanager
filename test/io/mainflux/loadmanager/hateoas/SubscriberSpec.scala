@@ -6,7 +6,7 @@ import io.mainflux.loadmanager.UnitSpec
 import io.mainflux.loadmanager.engine._
 
 final class SubscriberSpec extends UnitSpec {
-  "Subscriber entity" should "be created from valid request" in {
+  "Subscriber entity" must "be created from valid request" in {
     val attributes = SubscriberAttributes("test-callback")
 
     val groups        = (1 to 3).map(id => GroupIdentifier(GroupType, id))
@@ -35,7 +35,7 @@ final class SubscriberSpec extends UnitSpec {
     }
   }
 
-  "Subscriber response representation" should "be created from subscriber entity" in {
+  "Subscriber response representation" must "be created from subscriber entity" in {
     val s        = subscriber(1)
     val response = SubscriberResponse.fromDomain(s)
 
