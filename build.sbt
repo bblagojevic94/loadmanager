@@ -31,6 +31,8 @@ lazy val root = (project in file("."))
 
     javaOptions in Universal ++= Seq("-Dlogger.resource=logback-prod.xml"),
 
+    coverageExcludedPackages := """controllers\..*Reverse.*;router.Routes.*;""",
+
     libraryDependencies ++= {
       val core = Seq(
         guice,

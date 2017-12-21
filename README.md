@@ -1,6 +1,6 @@
 # Load manager
 
-[![Build Status][travis-img]][travis-url]
+[![Build Status][travis-img]][travis-url] [![codecov][codecov-img]][codecov-url]
 
 The service provides an HTTP API for organizing microgrid management platforms
 into groups, and obtaining their aggregated load.
@@ -65,6 +65,8 @@ docker-compose up -d
 After the composition is started, visit the `http://localhost:9000/docs` to access
 the interactive API documentation.
 
+[codecov-img]: https://codecov.io/gh/MainfluxLabs/loadmanager/branch/dev/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/MainfluxLabs/loadmanager
 [compose-url]: https://docs.docker.com/compose/overview/
 [docker-url]: https://docker.com
 [travis-img]: https://travis-ci.org/MainfluxLabs/loadmanager.svg?branch=dev
