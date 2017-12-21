@@ -2,13 +2,8 @@ package io.mainflux.loadmanager.engine
 
 import java.time.LocalDateTime
 
-final case class Microgrid(id: Option[Long] = None,
+final case class Microgrid(id: Option[Long],
                            url: String,
-                           platform: Platform,
+                           platform: PlatformType,
                            organisationId: String,
-                           createdAt: LocalDateTime = LocalDateTime.now())
-    extends Grid {
-
-  // TODO: implement calculating aggregate load for single microgrid
-  override def aggregateLoad: Double = ???
-}
+                           createdAt: LocalDateTime)

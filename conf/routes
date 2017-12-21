@@ -1,31 +1,28 @@
+POST    /microgrids                                         io.mainflux.loadmanager.controllers.Microgrids.create()
+GET     /microgrids                                         io.mainflux.loadmanager.controllers.Microgrids.retrieveAll()
+GET     /microgrids/:id                                     io.mainflux.loadmanager.controllers.Microgrids.retrieveOne(id: Long)
+DELETE  /microgrids/:id                                     io.mainflux.loadmanager.controllers.Microgrids.remove(id: Long)
+
+POST    /groups                                             io.mainflux.loadmanager.controllers.Groups.create()
+GET     /groups                                             io.mainflux.loadmanager.controllers.Groups.retrieveAll()
+GET     /groups/:id                                         io.mainflux.loadmanager.controllers.Groups.retrieveOne(id: Long)
+DELETE  /groups/:id                                         io.mainflux.loadmanager.controllers.Groups.remove(id: Long)
+POST    /groups/:groupId/relationships/microgrids           io.mainflux.loadmanager.controllers.Groups.addMicrogrids(groupId: Long)
+GET     /groups/:groupId/relationships/microgrids           io.mainflux.loadmanager.controllers.Groups.retrieveMicrogrids(groupId: Long)
+PATCH   /groups/:groupId/relationships/microgrids           io.mainflux.loadmanager.controllers.Groups.updateMicrogrids(groupId: Long)
+DELETE  /groups/:groupId/relationships/microgrids           io.mainflux.loadmanager.controllers.Groups.removeMicrogrids(groupId: Long)
+
+POST    /subscribers                                        io.mainflux.loadmanager.controllers.Subscribers.create()
+GET     /subscribers                                        io.mainflux.loadmanager.controllers.Subscribers.retrieveAll()
+GET     /subscribers/:id                                    io.mainflux.loadmanager.controllers.Subscribers.retrieveOne(id: Long)
+DELETE  /subscribers/:id                                    io.mainflux.loadmanager.controllers.Subscribers.remove(id: Long)
+POST    /subscribers/:subscriberId/relationships/groups     io.mainflux.loadmanager.controllers.Subscribers.subscribe(subscriberId: Long)
+GET     /subscribers/:subscriberId/relationships/groups     io.mainflux.loadmanager.controllers.Subscribers.retrieveGroups(subscriberId: Long)
+PATCH   /subscribers/:subscriberId/relationships/groups     io.mainflux.loadmanager.controllers.Subscribers.updateGroups(subscriberId: Long)
+DELETE  /subscribers/:subscriberId/relationships/groups     io.mainflux.loadmanager.controllers.Subscribers.unsubscribe(subscriberId: Long)
+
 GET     /health                                             io.mainflux.loadmanager.controllers.ServiceInfo.health()
 
 GET     /docs                                               io.mainflux.loadmanager.controllers.ServiceInfo.docs()
-
-GET     /groups                                             io.mainflux.loadmanager.controllers.Groups.retrieveAll()
-POST    /groups                                             io.mainflux.loadmanager.controllers.Groups.create()
-GET     /groups/:id                                         io.mainflux.loadmanager.controllers.Groups.retrieveOne(id: Long)
-DELETE  /groups/:id                                         io.mainflux.loadmanager.controllers.Groups.remove(id: Long)
-
-GET     /microgrids                                         io.mainflux.loadmanager.controllers.Microgrids.retrieveAll()
-POST    /microgrids                                         io.mainflux.loadmanager.controllers.Microgrids.create()
-GET     /microgrids/:id                                     io.mainflux.loadmanager.controllers.Microgrids.retrieveOne(id: Long)
-
-GET     /groups/:groupId/relationships/microgrids           io.mainflux.loadmanager.controllers.Groups.retrieveGroupMicrogrids(groupId: Long)
-POST    /groups/:groupId/relationships/microgrids           io.mainflux.loadmanager.controllers.Groups.addMicrogridsInGroup(groupId: Long)
-PATCH   /groups/:groupId/relationships/microgrids           io.mainflux.loadmanager.controllers.Groups.updateAllMicrogridsOfGroup(groupId: Long)
-DELETE  /groups/:groupId/relationships/microgrids           io.mainflux.loadmanager.controllers.Groups.removeMicrogridsFromGroup(groupId: Long)
-
-GET     /subscribers                                        io.mainflux.loadmanager.controllers.Subscriptions.retrieveAll()
-POST    /subscribers                                        io.mainflux.loadmanager.controllers.Subscriptions.create()
-GET     /subscribers/:id                                    io.mainflux.loadmanager.controllers.Subscriptions.retrieveOne(id: Long)
-DELETE  /subscribers/:id                                    io.mainflux.loadmanager.controllers.Subscriptions.remove(id: Long)
-
-GET     /subscribers/:subscriberId/relationships/groups     io.mainflux.loadmanager.controllers.Subscriptions.retrieveSubscriberGroups(subscriberId: Long)
-POST    /subscribers/:subscriberId/relationships/groups     io.mainflux.loadmanager.controllers.Subscriptions.subscribeOnGroups(subscriberId: Long)
-PATCH   /subscribers/:subscriberId/relationships/groups     io.mainflux.loadmanager.controllers.Subscriptions.updateAllGroupsOfSubscription(subscriberId: Long)
-DELETE  /subscribers/:subscriberId/relationships/groups     io.mainflux.loadmanager.controllers.Subscriptions.unsubscribeFromGroups(subscriberId: Long)
-
 GET     /assets/*file                                       controllers.Assets.versioned(path = "/public", file: Asset)
-
 GET     /swagger/*file                                      controllers.Assets.at(path = "/public/lib/swagger-ui", file)

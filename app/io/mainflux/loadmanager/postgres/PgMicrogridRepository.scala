@@ -7,33 +7,22 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class PgMicrogridRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(
-    implicit val ec: ExecutionContext
-) extends MicrogridRepository
+final class PgMicrogridRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
+    extends MicrogridRepository
     with HasDatabaseConfigProvider[JdbcProfile]
     with DatabaseSchema {
 
-  override def save(microgrid: Microgrid): Future[Microgrid] = {
-    val dbAction = microgrids
-      .returning(microgrids.map(_.id))
-      .into((item, id) => item.copy(id = Some(id))) += microgrid
-    db.run(dbAction)
+  def save(microgrid: Microgrid): Future[Microgrid] = {
+    val mgRepo = microgrids.returning(microgrids.map(_.id)).into((mg, id) => mg.copy(id = Some(id)))
+    db.run(mgRepo += microgrid)
   }
 
-  override def retrieveOne(id: Long): Future[Option[Microgrid]] =
+  def retrieveAll: Future[Seq[Microgrid]] = db.run(microgrids.result)
+
+  def retrieveOne(id: Long): Future[Option[Microgrid]] =
     db.run(microgrids.filter(_.id === id).result.headOption)
 
-  override def retrieveAll: Future[Seq[Microgrid]] =
-    db.run(microgrids.result)
-
-  override def retrieveAllByIds(grids: Seq[Long]): Future[Seq[Microgrid]] =
-    db.run(microgrids.filter(_.id.inSet(grids)).result)
-
-  override def retrieveAllByGroup(groupId: Long): Future[Seq[Long]] = {
-    val dbAction = groupsMicrogrids.filter(_.groupId === groupId).result
-    db.run(dbAction).map(_.map(_.microgridId))
-  }
-
+  def remove(id: Long): Future[Int] = db.run(microgrids.filter(_.id === id).delete)
 }

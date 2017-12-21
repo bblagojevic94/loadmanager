@@ -10,27 +10,15 @@ info:
   version: 1.0.0
 paths:
   /microgrids:
-    get:
-      summary: Retrieve all registred microgrid management platforms.
-      tags:
-        - microgrids
-      responses:
-        '200':
-          description: Response which indicates that microgrid management platforms are successfully retrieved.
-          content:
-            application/vnd.api+json:
-              schema:
-                $ref: '#/components/schemas/MicroGridCollectionResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
     post:
-      summary: |
-        Register new microgrid management platform specifying url on which it is accessible.
-        Currently supported platforms are OSGP and Mainflux.
+      summary: Creates new microgrid
+      description: |
+        Registers new microgrid management platform. The platform specification must include an URL
+        of the platform. Currently, the service supports instances of Mainflux and Open Smart Grid Platform.
       tags:
         - microgrids
       requestBody:
-        description: Request to register microgrid management platform.
+        description: Microgrid management platform specification.
         required: true
         content:
           application/vnd.api+json:
@@ -38,7 +26,8 @@ paths:
               $ref: '#/components/schemas/MicroGridRequest'
       responses:
         '201':
-          description: Response which indicates that microgrid is successfully registered.
+          description: |
+            Confirmation of successful creation. Contains an auto-generated microgrid identifier.
           content:
             application/vnd.api+json:
               schema:
@@ -47,16 +36,29 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: Retrieves information about registered microgrids
+      tags:
+        - microgrids
+      responses:
+        '200':
+          description: A collection containing information about each registered microgrid.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/MicroGridCollectionResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /microgrids/{id}:
     get:
-      summary: Retrieve single microgrid management platform by specifying it's unique identifier.
+      summary: Retrieves information about single microgrid
       tags:
         - microgrids
       parameters:
-        - $ref: '#/components/parameters/idParam'
+        - $ref: '#/components/parameters/id'
       responses:
         '200':
-          description: Response which indicates that microgrid with specified id exists.
+          description: Contains information about the specified microgrid management platform instance.
           content:
             application/vnd.api+json:
               schema:
@@ -71,34 +73,32 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /groups:
-    get:
-      summary: Retrieve all existing groups and their members(microgrid management platform).
+    delete:
       tags:
-        - groups
+        - microgrids
+      summary: Deletes specified microgrid
+      description: |
+        Deletes microgrid specified using its unique identifier. The specified instance will be
+        removed from all groups that it belongs.
+      parameters:
+        - $ref: '#/components/parameters/id'
       responses:
-        '200':
-          description: Response which indicates that microgrid management platforms are successfully retrieved.
-          content:
-            application/vnd.api+json:
-              schema:
-                properties:
-                  data:
-                    type: array
-                    items:
-                      allOf:
-                        - $ref: '#/components/schemas/GroupDataResponse'
-                        - $ref: '#/components/schemas/Links'
-                required:
-                  - data
+        '204':
+          description: Microgrid is successfully removed.
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /groups:
     post:
-      summary: Register new group(container of microgrid management platforms) by specifying all it's memebers.
+      summary: Creates new group
+      description: |
+        Group is a container of microgrid management platform instances. Note that only registered
+        microgrids can be group members.
       tags:
         - groups
       requestBody:
-        description: Request to register new group by specifying it's name and included microgrid management platforms.
+        description: Group specification.
         required: true
         content:
           application/vnd.api+json:
@@ -106,7 +106,8 @@ paths:
               $ref: '#/components/schemas/GroupRequest'
       responses:
         '201':
-          description: Response which indicates that group is successfully registered and connected with specified members.
+          description: |
+            Confirmation of successful creation. Contains an auto-generated group identifier.
           content:
             application/vnd.api+json:
               schema:
@@ -121,16 +122,37 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: Retrieves information about groups and their members
+      tags:
+        - groups
+      responses:
+        '200':
+          description: A collection containing information about groups and their members.
+          content:
+            application/vnd.api+json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/GroupDataResponse'
+                        - $ref: '#/components/schemas/Links'
+                required:
+                  - data
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /groups/{id}:
     get:
-      summary: Retrieve single group by specifying it's unique identifier.
+      summary: Retrieves information about single group
       tags:
         - groups
       parameters:
-        - $ref: '#/components/parameters/idParam'
+        - $ref: '#/components/parameters/id'
       responses:
         '200':
-          description: Response which indicates that group with specified id exists.
+          description: Contains information about the specified group.
           content:
             application/vnd.api+json:
               schema:
@@ -148,29 +170,29 @@ paths:
     delete:
       tags:
         - groups
-      summary: |
-        Delete group by specifying it's unique identifier. All subscribers that have subscription on specified
-        group won't be notified about it's aggreagate loads.
+      summary: Deletes specified group
+      description: |
+        Deletes group specified using its unique identifier. All subscriptions to the removed
+        group will be cancelled.
       parameters:
-        - $ref: '#/components/parameters/idParam'
+        - $ref: '#/components/parameters/id'
       responses:
         '204':
-          description: Response which indicate that group is successfully deleted.
+          description: Group is successfully removed.
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /groups/{groupId}/relationships/microgrids:
+  /groups/{id}/relationships/microgrids:
     get:
-      summary: Retrieve all microgrid management platforms included in specified group.
+      summary: Retrieves information about grouped microgrid management platforms
       tags:
         - groups
-        - microgrids
       parameters:
-        - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/id'
       responses:
         '200':
-          description: Response which consists of microgrids that are group members.
+          description: A collection containing identifiers of each group member.
           content:
             application/vnd.api+json:
               schema:
@@ -186,16 +208,16 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     post:
-      summary: |
-        Add existing microgrids as a new members of specified group. Group aggreaget load
-        will automatically be affected by this action.
+      summary: Adds microgrids to the group
+      description:
+        Adds existing microgrids to the group. The change will be visible in the next update
+        of group's aggregated load.
       tags:
         - groups
-        - microgrids
       parameters:
-        - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/id'
       requestBody:
-        description: Request consisting of list of ids of microgrid platforms that will be included in group.
+        description: A collection containing identifiers of each new group member.
         required: true
         content:
           application/vnd.api+json:
@@ -203,32 +225,41 @@ paths:
               $ref: '#/components/schemas/MicroGridDataCollection'
       responses:
         '204':
-          description: Response thath indicates that microgrid management platform is successfully included in scpecified group.
+          description: New group members are successfully added.
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
     patch:
-      summary: |
-        Update all relationships between microgrids and specified group. Group will consist only from memebers specified
-        in request. Previous memebers won't be included if they are not specified in request.
+      summary: Updates group members
+      description: |
+        Performs a complete replacement of group members in all-or-nothing manner. The change will be
+        visible in the next update of group's aggregated load.
       tags:
         - groups
-        - microgrids
       parameters:
-        - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        description: A collection containing identifiers of each new group member.
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/MicroGridDataCollection'
       responses:
         '403':
           $ref: '#/components/responses/Forbidden'
     delete:
-      summary: Specify all microgrid management platforms that you want to remove from group specified by it's unique identifier.
+      summary: Specifies microgrids that should be removed from a group
+      description: |
+        Specified microgrids will be removed in all-or-nothing manner. The change will be visible
+        in the next update of group's aggregated load.
       tags:
         - groups
-        - microgrids
       parameters:
-        - $ref: '#/components/parameters/groupId'
+        - $ref: '#/components/parameters/id'
       requestBody:
-        description: Request consiting of unique identifier of microgrids that will be deleted from group.
+        description: A collection of microgrid identifiers to be removed.
         required: true
         content:
           application/vnd.api+json:
@@ -236,42 +267,21 @@ paths:
               $ref: '#/components/schemas/MicroGridDataCollection'
       responses:
         '204':
-          description: Response which indicates that specified microgrids are deleted from group.
+          description: Specified microgirds have been successfully removed from a group.
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /subscribers:
-    get:
-      summary: Retrieve all defined subscriptions on groups aggregate load.
-      tags:
-        - subscribers
-      responses:
-        '200':
-          description: Response which indicates thath subscribers are successfully retrieved.
-          content:
-            application/vnd.api+json:
-              schema:
-                properties:
-                  data:
-                    type: array
-                    items:
-                      allOf:
-                        - $ref: '#/components/schemas/SubscriberDataResponse'
-                        - $ref: '#/components/schemas/Links'
-                required:
-                  - data
-                  - links
-        '500':
-          $ref: '#/components/responses/InternalServerError'
     post:
-      summary: |
-        Create subscriber(client) that will be notified every time group aggregate load for specified groups is calculated.
-        All notifications will be send on callback specified in request body.
+      summary: Creates new subscriber
+      description: |
+        A subscription is created by specifying the URL on which it expects to receive updates of
+        aggregated load for each of the group it is subscribed on.
       tags:
         - subscribers
       requestBody:
-        description: Request for creating new subscription by specifying all groups for which subscriber is interested in.
+        description: Subscriber specification including list of all group it wants to subscribe immediately.
         required: true
         content:
           application/vnd.api+json:
@@ -279,9 +289,7 @@ paths:
               $ref: '#/components/schemas/SubscriberRequest'
       responses:
         '201':
-          description: |
-           Response which indicates that subscription is created and reports
-           for agggregate load will be sent periodically to client
+          description: Confirmation of successful subscription. Contains an auto-generated subscriber identifier.
           content:
             application/vnd.api+json:
               schema:
@@ -299,33 +307,51 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       callbacks:
         webhook:
-          # when data is sent, it will be sent to the `callback` provided
           '{$request.body#/data/attributes/callback}':
             post:
               description: |
-                Notification for client that will be sent every time new report for subscribed group is created.
-                Report consists of aggregate load for group and date when report is generated.
+                Each time new aggregated load update is prepared, it will be sent to provided callback.
               requestBody:
-                description: Request consisting of aggregate load for group that client is subscribed to.
+                description: Aggregated load update.
                 content:
                   application/vnd.api+json:
                     schema:
                       $ref: '#/components/schemas/CallbackPayload'
               responses:
                 '204':
-                  description: |
-                    Your server implementation should return this HTTP status code
-                    if the data was received successfully
+                  description: Empty response with the appropriate HTTP status is required from the subscriber.
+    get:
+      summary: Retrieves information about registered subscribers
+      tags:
+        - subscribers
+      responses:
+        '200':
+          description: A collection containing information about registered subscribers.
+          content:
+            application/vnd.api+json:
+              schema:
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/SubscriberDataResponse'
+                        - $ref: '#/components/schemas/Links'
+                required:
+                  - data
+                  - links
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /subscribers/{id}:
     get:
-      summary: Retrive single subscriber by specifying it's unique identifier.
+      summary: Retrives information about single subscriber
       tags:
         - subscribers
       parameters:
-        - $ref: '#/components/parameters/idParam'
+        - $ref: '#/components/parameters/id'
       responses:
         '200':
-          description: Response consisting of subscription and groups that subscription is created for.
+          description: Contains information about specified subscriber.
           content:
             application/vnd.api+json:
               schema:
@@ -343,31 +369,27 @@ paths:
     delete:
       tags:
         - subscribers
-      summary: |
-        Unsubscribe from retrieving reports from our application.
-        Reports won't be send to specified client for specified group.
+      summary: Deletes specified subscriber
+      description: Deletes specified subscriber and cancels all of its group subscriptions.
       parameters:
-        - $ref: '#/components/parameters/idParam'
+        - $ref: '#/components/parameters/id'
       responses:
         '204':
-          description: Response which indicates that client successfuly removed subscription.
+          description: Subscriber is successfully removed.
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /subscribers/{subscriberId}/relationships/groups:
+  /subscribers/{id}/relationships/groups:
     get:
-      summary: Retrieve all groups that subscriber is subscribed on. Subscriber is specified by it's unique identifier as path parameter.
+      summary: Retrieves information about groupes subscriber is subscribed to
       tags:
         - subscribers
-        - groups
       parameters:
-        - $ref: '#/components/parameters/subscriberId'
+        - $ref: '#/components/parameters/id'
       responses:
         '200':
-          description: |
-            Response which indicates that subscriber exists.
-            Data section will consists of groups that subscriber is subscribed on.
+          description: A collection containing identifiers of each group subscriber is subscribed to.
           content:
             application/vnd.api+json:
               schema:
@@ -383,16 +405,15 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     post:
-      summary: |
-        Create new subscriptions to aggregate load of groups. Client will be notified about all
-        calculated aggreagte loads for specified groups
+      summary: Adds group to the list of subscribed groups
+      description: |
+        Once a new group is added, subscriber will start receiving its aggregated load updates.
       tags:
         - subscribers
-        - groups
       parameters:
-        - $ref: '#/components/parameters/subscriberId'
+        - $ref: '#/components/parameters/id'
       requestBody:
-        description: Request consisting of groups that client want to subscribe on.
+        description: A collection containing identifiers of each new group.
         required: true
         content:
           application/vnd.api+json:
@@ -400,32 +421,37 @@ paths:
               $ref: '#/components/schemas/GroupDataCollection'
       responses:
         '204':
-          description: Response indicates that client successfully crate subscription on groups.
+          description: New subscriptions are successfully created.
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
     patch:
-      summary: |
-        Update all subscriptions that client already created. Client will retrieve reports only from groups specified
-        in request. Previous groups won't be included in report if they are not specified in request.
+      summary: Updates list of subscribed groups
+      description: Performs a complete replacement of group members in all-or-nothing manner.
       tags:
         - subscribers
-        - groups
       parameters:
-        - $ref: '#/components/parameters/subscriberId'
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        description: A collection containing identifiers of each new group.
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/GroupDataCollection'
       responses:
         '403':
           $ref: '#/components/responses/Forbidden'
     delete:
-      summary: Specify all groups that you want to remove from subscription specified by it's unique identifier.
+      summary: Specifies groups to which subscriptions should be cancelled
+      description: Specified subscriptions will be cancelled in all-or-nothing manner.
       tags:
         - subscribers
-        - groups
       parameters:
-        - $ref: '#/components/parameters/subscriberId'
+        - $ref: '#/components/parameters/id'
       requestBody:
-        description: Request consists of groups for which client don't want to retrieve reports no more.
+        description: A collection of group identifiers to be removed.
         required: true
         content:
           application/vnd.api+json:
@@ -433,7 +459,7 @@ paths:
               $ref: '#/components/schemas/GroupDataCollection'
       responses:
         '204':
-          description: Response which indicates that client is successfully unsubscribed from groups.
+          description: Subscriber is successfully unsubscribed from specified groups.
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -446,7 +472,7 @@ components:
           properties:
             self:
               type: string
-              description: Path on which resource is accessible.
+              description: Resource URL relative to the service instance host.
       required:
         - links
     Identifier:
@@ -454,7 +480,7 @@ components:
         id:
           type: integer
           format: int64
-          description: Unique identifier of entity
+          description: Unique resource identifier
       required:
         - id
     MicroGridRequest:
@@ -478,17 +504,17 @@ components:
       properties:
         url:
           type: string
-          description: Url on which microgrid is accessible
-          example: '216.3.128.12'
+          description: Microgrid management platform's URL.
+          example: "216.3.128.12"
         platformType:
           type: string
           enum:
             - OSGP
             - Mainflux
-          description: Platform type of specified microgrid
+          description: Type of microgrid management platform.
         organisationId:
           type: string
-          description: Unique identifier of organisation that is microgrid owner
+          description: Unique identifier of microgrid owner.
           example: "test-organisation"
       required:
         - url
@@ -534,7 +560,7 @@ components:
       properties:
         name:
           type: string
-          description: Name of group
+          description: Group name.
           example: "Mainflux group"
       required:
         - name
@@ -628,8 +654,8 @@ components:
       properties:
         callback:
           type: string
-          description: Url that will be used to notify subscriber about aggregate load.
-          example: 'http://www.client.com/callback'
+          description: URL used as a callback for updates of group's aggregated load.
+          example: "http://www.client.com/callback"
       required:
         - callback
     SubscribersRelationshipRequest:
@@ -688,7 +714,7 @@ components:
       properties:
         createdAt:
           type: string
-          description: Time when error occurred in ISO-8601 format
+          description: Time when error occurred expressed in ISO-8601 format.
           example: "2017-10-15T15:00:00.576+11:00"
       required:
         - createdAt
@@ -696,10 +722,10 @@ components:
       properties:
         status:
           type: string
-          description: HTTP status code of an error
+          description: HTTP status code of an error.
         detail:
           type: string
-          description: Human-readable explanation
+          description: Human-readable error description.
       required:
         - status
         - detail
@@ -716,8 +742,8 @@ components:
                 aggregatedLoad:
                   type: number
                   format: double
-                  description: Sum of all microgrid loads for specified group
-                  example: 50
+                  description: Load aggregated for group of microgrids client is subscriber to.
+                  example: 50.0
               required:
                 - aggregatedLoad
           required:
@@ -748,7 +774,7 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
     NotFound:
-      description: Entity not found.
+      description: Resource does not exist.
       content:
         application/vnd.api+json:
           schema:
@@ -760,27 +786,11 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
   parameters:
-    idParam:
+    id:
       in: path
       name: id
       required: true
-      description: Unique identifier of entity
-      schema:
-        type: integer
-        format: int64
-    groupId:
-      in: path
-      name: groupId
-      required: true
-      description: Unique identifier of group
-      schema:
-        type: integer
-        format: int64
-    subscriberId:
-      in: path
-      name: subscriberId
-      required: true
-      description: Unique identifier of subscriber
+      description: Unique resource identifier.
       schema:
         type: integer
         format: int64

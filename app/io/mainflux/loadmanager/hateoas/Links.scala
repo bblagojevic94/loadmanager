@@ -1,3 +1,3 @@
 package io.mainflux.loadmanager.hateoas
 
-final case class Meta(createdAt: String)
+final case class Links(self: String)

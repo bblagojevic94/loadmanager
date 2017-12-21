@@ -5,6 +5,9 @@
 The service provides an HTTP API for organizing microgrid management platforms
 into groups, and obtaining their aggregated load.
 
+> The implementation serves as a proof-of-concept presented in paper "Composing 
+Internet of Things Platforms in Smart Grid".
+
 ## Configuration
 
 The service is configured using the following environment variables:

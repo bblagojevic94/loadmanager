@@ -1,14 +1,12 @@
 import com.google.inject.AbstractModule
-import io.mainflux.loadmanager.engine.{GroupRepository, MicrogridRepository, SubscriptionRepository, Subscriptions}
-import io.mainflux.loadmanager.postgres.{PgGroupRepository, PgMicrogridRepository, PgSubscriptionRepository}
+import io.mainflux.loadmanager.engine.{GroupRepository, MicrogridRepository, SubscriberRepository}
+import io.mainflux.loadmanager.postgres.{PgGroupRepository, PgMicrogridRepository, PgSubscriberRepository}
 import play.api.libs.concurrent.AkkaGuiceSupport
 
-class Module extends AbstractModule with AkkaGuiceSupport {
+final class Module extends AbstractModule with AkkaGuiceSupport {
   override def configure(): Unit = {
     bind(classOf[MicrogridRepository]).to(classOf[PgMicrogridRepository])
     bind(classOf[GroupRepository]).to(classOf[PgGroupRepository])
-    bind(classOf[SubscriptionRepository]).to(classOf[PgSubscriptionRepository])
-
-    bindActor[Subscriptions]("subscription", props => props.withDispatcher("akka.actor.stash-dispatcher"))
+    bind(classOf[SubscriberRepository]).to(classOf[PgSubscriberRepository])
   }
 }

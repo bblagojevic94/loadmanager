@@ -8,28 +8,8 @@ language: scala
 scala:
   - 2.12.2
 
-env:
-  - DATABASE_URL=dummy
-
-script:
-  - sbt ++$TRAVIS_SCALA_VERSION test
-
-after_success:
-  - if [ "$TRAVIS_BRANCH" == "master" ]; then
-      VERSION=$(grep 'version := ' build.sbt | sed 's:^[^"]*"\([^"]*\)".*:\1:');
-      sbt ++$TRAVIS_SCALA_VERSION clean dist;
-      unzip target/universal/loadmanager-*.zip -d docker;
-      mv docker/loadmanager-* docker/loadmanager;
-      docker build --rm -t image docker;
-      docker tag image mainflux/load-manager:$VERSION;
-      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
-      docker push mainflux/load-manager:$VERSION;
-    elif [ "$TRAVIS_BRANCH" == "dev" ]; then
-      sbt ++$TRAVIS_SCALA_VERSION clean dist;
-      unzip target/universal/loadmanager-*.zip -d docker;
-      mv docker/loadmanager-* docker/loadmanager;
-      docker build --rm -t image docker;
-      docker tag image mainflux/load-manager:latest;
-      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
-      docker push mainflux/load-manager:latest;
-    fi
+deploy:
+  - provider: script
+    script: scripts/docker.sh
+    on:
+      branch: master

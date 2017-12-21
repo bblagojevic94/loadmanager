@@ -8,11 +8,13 @@ import play.api.http.HttpErrorHandler
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
-final class Microgrids @Inject()(microgridRepository: MicrogridRepository,
-                                 cc: ControllerComponents,
-                                 eh: HttpErrorHandler)(implicit val ec: ExecutionContext)
+final class Microgrids @Inject()(
+    microgridRepository: MicrogridRepository,
+    cc: ControllerComponents,
+    eh: HttpErrorHandler
+)(implicit val ec: ExecutionContext)
     extends ApiEndpoint(cc, eh) {
 
   def create: Action[JsValue] = Action.async(parseJsonAPI) { implicit request =>
@@ -20,30 +22,39 @@ final class Microgrids @Inject()(microgridRepository: MicrogridRepository,
       .validate[MicrogridRequest]
       .fold(
         errors => createErrorResponse(errors),
-        body => {
+        body =>
           microgridRepository
             .save(body.data.toDomain)
             .map { mg =>
               Created(Json.toJson(MicrogridResponse.fromDomain(mg))).as(ContentType)
-            }
-        }
+          }
       )
   }
 
   def retrieveOne(id: Long): Action[AnyContent] = Action.async {
     microgridRepository
       .retrieveOne(id)
-      .map {
-        case Some(microgrid) =>
-          Ok(Json.toJson(MicrogridResponse.fromDomain(microgrid))).as(ContentType)
-        case _ => throw EntityNotFound(s"Microgrid with id $id does not exist")
+      .flatMap {
+        case Some(mg) =>
+          val body = Json.toJson(MicrogridResponse.fromDomain(mg))
+          Future.successful(Ok(body).as(ContentType))
+        case _ => Future.failed(EntityNotFound(s"Microgrid with id $id does not exist."))
       }
   }
 
   def retrieveAll: Action[AnyContent] = Action.async {
-    microgridRepository.retrieveAll.map { microgrids =>
-      Ok(Json.toJson(MicrogridCollectionResponse.fromDomain(microgrids)))
-        .as(ContentType)
+    microgridRepository.retrieveAll.map { entities =>
+      val body = MicrogridCollectionResponse.fromDomain(entities)
+      Ok(Json.toJson(body)).as(ContentType)
     }
+  }
+
+  def remove(id: Long): Action[AnyContent] = Action.async {
+    microgridRepository
+      .remove(id)
+      .flatMap {
+        case 0 => Future.failed(EntityNotFound(s"Microgrid with id $id does not exist."))
+        case _ => Future.successful(NoContent)
+      }
   }
 }

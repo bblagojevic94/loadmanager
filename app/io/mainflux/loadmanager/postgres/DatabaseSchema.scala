@@ -1,112 +1,90 @@
 package io.mainflux.loadmanager.postgres
 
+import java.sql.Timestamp
 import java.time.LocalDateTime
 
-import io.mainflux.loadmanager.engine._
-import io.mainflux.loadmanager.postgres.DatabaseMapper._
+import io.mainflux.loadmanager.engine.{GroupInfo, Microgrid, PlatformType, SubscriberInfo}
+import slick.ast.BaseTypedType
+import slick.jdbc.JdbcType
 import slick.jdbc.PostgresProfile.api._
-import slick.lifted.{ProvenShape, TableQuery}
 
 trait DatabaseSchema {
+  implicit val dtm: JdbcType[LocalDateTime] with BaseTypedType[LocalDateTime] =
+    MappedColumnType.base[LocalDateTime, Timestamp](Timestamp.valueOf, _.toLocalDateTime)
 
-  val microgrids: TableQuery[MicrogridRow]                  = TableQuery[MicrogridRow]
-  val groups: TableQuery[GroupRow]                          = TableQuery[GroupRow]
-  val subscriptions: TableQuery[SubscriptionRow]            = TableQuery[SubscriptionRow]
-  val groupsMicrogrids: TableQuery[GroupMicrogridRow]       = TableQuery[GroupMicrogridRow]
-  val subscriptionsGroups: TableQuery[SubscriptionGroupRow] = TableQuery[SubscriptionGroupRow]
+  implicit val ptm: JdbcType[PlatformType] with BaseTypedType[PlatformType] =
+    MappedColumnType.base[PlatformType, String](_.name, PlatformType.valueOf)
 
-  class MicrogridRow(tag: Tag) extends Table[Microgrid](tag, "microgrids") {
-    def * : ProvenShape[Microgrid] = {
+  val microgrids       = TableQuery[Microgrids]
+  val groups           = TableQuery[Groups]
+  val subscribers      = TableQuery[Subscribers]
+  val groupedGrids     = TableQuery[GroupsMicrogrids]
+  val subscribedGroups = TableQuery[SubscribersGroups]
 
-      val props = (id.?, url, platform, organisationId, createdAt)
+  final class Microgrids(tag: Tag) extends Table[Microgrid](tag, "microgrids") {
+    def * =
+      (id.?, url, platform, organisationId, createdAt) <> (Microgrid.tupled, Microgrid.unapply)
 
-      props <> (Microgrid.tupled, Microgrid.unapply)
-    }
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-    def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def url = column[String]("url")
 
-    def url: Rep[String] = column[String]("url")
+    def platform = column[PlatformType]("platform")
 
-    def platform: Rep[Platform] = column[Platform]("platform")
+    def organisationId = column[String]("organisation_id")
 
-    def organisationId: Rep[String] = column[String]("organisation_id")
-
-    def createdAt: Rep[LocalDateTime] = column[LocalDateTime]("created_at")
-
+    def createdAt = column[LocalDateTime]("created_at")
   }
 
-  class GroupRow(tag: Tag) extends Table[Group](tag, "groups") {
-    def * : ProvenShape[Group] = {
+  final class Groups(tag: Tag) extends Table[GroupInfo](tag, "groups") {
+    def * = (id.?, name, createdAt) <> (GroupInfo.tupled, GroupInfo.unapply)
 
-      val props = (id.?, name, createdAt).shaped
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-      props.<>({ tuple =>
-        Group.apply(id = tuple._1, name = tuple._2, createdAt = tuple._3)
-      }, { (group: Group) =>
-        Some((group.id, group.name, group.createdAt))
-      })
-    }
+    def name = column[String]("name")
 
-    def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
-
-    def name: Rep[String] = column[String]("name")
-
-    def createdAt: Rep[LocalDateTime] = column[LocalDateTime]("created_at")
-
+    def createdAt = column[LocalDateTime]("created_at")
   }
 
-  class GroupMicrogridRow(tag: Tag) extends Table[GroupMicrogrid](tag, "groups_microgrids") {
-    def * : ProvenShape[GroupMicrogrid] = {
+  final class Subscribers(tag: Tag) extends Table[SubscriberInfo](tag, "subscribers") {
+    def * = (id.?, callback, createdAt) <> (SubscriberInfo.tupled, SubscriberInfo.unapply)
 
-      val props = (groupId, microgridId, createdAt)
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-      props <> (GroupMicrogrid.tupled, GroupMicrogrid.unapply)
-    }
+    def callback = column[String]("callback")
 
-    def groupId: Rep[Long] = column[Long]("group_id")
-
-    def microgridId: Rep[Long] = column[Long]("microgrid_id")
-
-    def createdAt: Rep[LocalDateTime] = column[LocalDateTime]("created_at")
-
+    def createdAt = column[LocalDateTime]("created_at")
   }
 
-  class SubscriptionRow(tag: Tag) extends Table[Subscription](tag, "subscriptions") {
-    def * : ProvenShape[Subscription] = {
+  final class GroupsMicrogrids(tag: Tag) extends Table[(Long, Long)](tag, "groups_microgrids") {
+    def * = (groupId, microgridId)
 
-      val props = (id.?, callback, createdAt).shaped
+    def pk = primaryKey("pk_gm", (groupId, microgridId))
 
-      props.<>(
-        { tuple =>
-          Subscription.apply(id = tuple._1, callback = tuple._2, createdAt = tuple._3)
-        }, { (subscription: Subscription) =>
-          Some((subscription.id, subscription.callback, subscription.createdAt))
-        }
-      )
-    }
+    def gfk =
+      foreignKey("fk_gm_groups", groupId, groups)(_.id, onDelete = ForeignKeyAction.Cascade)
 
-    def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def mfk =
+      foreignKey("fk_gm_grids", microgridId, microgrids)(_.id, onDelete = ForeignKeyAction.Cascade)
 
-    def callback: Rep[String] = column[String]("callback")
+    def groupId = column[Long]("group_id")
 
-    def createdAt: Rep[LocalDateTime] = column[LocalDateTime]("created_at")
-
+    def microgridId = column[Long]("microgrid_id")
   }
 
-  class SubscriptionGroupRow(tag: Tag) extends Table[SubscriptionGroup](tag, "subscriptions_groups") {
-    def * : ProvenShape[SubscriptionGroup] = {
+  final class SubscribersGroups(tag: Tag) extends Table[(Long, Long)](tag, "subscribers_groups") {
+    def * = (subscriberId, groupId)
 
-      val props = (subscriptionId, groupId, createdAt)
+    def pk = primaryKey("pk_sg", (subscriberId, groupId))
 
-      props <> (SubscriptionGroup.tupled, SubscriptionGroup.unapply)
-    }
+    def sfk =
+      foreignKey("fk_sg_subs", subscriberId, subscribers)(_.id, onDelete = ForeignKeyAction.Cascade)
 
-    def subscriptionId: Rep[Long] = column[Long]("subscription_id")
+    def gfk =
+      foreignKey("fk_sg_groups", groupId, groups)(_.id, onDelete = ForeignKeyAction.Cascade)
 
-    def groupId: Rep[Long] = column[Long]("group_id")
+    def subscriberId = column[Long]("subscriber_id")
 
-    def createdAt: Rep[LocalDateTime] = column[LocalDateTime]("created_at")
-
+    def groupId = column[Long]("group_id")
   }
-
 }
