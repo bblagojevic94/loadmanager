@@ -1,6 +1,7 @@
 import Dependencies._
 
 lazy val commonSettings = Seq(
+  name := "loadmanager",
   organization := "io.mainflux",
   organizationName := "Mainflux",
   scalacOptions ++= Seq(
@@ -25,13 +26,11 @@ lazy val commonSettings = Seq(
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
+  .settings(commonSettings: _*)
   .settings(
-    commonSettings,
-    name := "loadmanager",
+    coverageExcludedPackages := """controllers\..*Reverse.*;router.Routes.*;""",
 
     javaOptions in Universal ++= Seq("-Dlogger.resource=logback-prod.xml"),
-
-    coverageExcludedPackages := """controllers\..*Reverse.*;router.Routes.*;""",
 
     libraryDependencies ++= {
       val core = Seq(
