@@ -9,7 +9,7 @@ final class SubscriberSpec extends UnitSpec {
   "Subscriber entity" should "be created from valid request" in {
     val attributes = SubscriberAttributes("test-callback")
 
-    val groups        = (1 to 3).map(id => GroupIdentifier(GroupType, id))
+    val groups        = (1 to 3).map(id => GroupIdentifier(GroupType, id.toLong))
     val relationships = SubscriberRelationshipsRequest(GroupIdentifiers(groups.toSet))
 
     val request = SubscriberRequest(SubscriberData(SubscriberType, attributes, relationships))

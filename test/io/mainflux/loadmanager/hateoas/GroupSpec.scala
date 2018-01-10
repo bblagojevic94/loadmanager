@@ -9,7 +9,7 @@ final class GroupSpec extends UnitSpec {
   "Group entity" should "be created from valid request" in {
     val attributes = GroupAttributes("test-name")
 
-    val ids           = (1 to 3).map(id => MicrogridIdentifier(MicrogridType, id))
+    val ids           = (1 to 3).map(id => MicrogridIdentifier(MicrogridType, id.toLong))
     val relationships = GroupRelationshipsRequest(MicrogridIdentifiers(ids.toSet))
 
     val request = GroupRequest(GroupData(GroupType, attributes, relationships))

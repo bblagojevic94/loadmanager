@@ -59,5 +59,5 @@ lazy val root = (project in file("."))
       )
     },
 
-    wartremoverWarnings ++= Warts.unsafe
-  )
+    wartremoverWarnings ++= Warts.unsafe.filterNot(_.clazz == Wart.NonUnitStatements.clazz)
+)
