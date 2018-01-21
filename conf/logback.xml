@@ -11,12 +11,7 @@
         <appender-ref ref="stdout" />
     </appender>
 
-    <logger name="play" level="INFO" />
-    <logger name="application" level="DEBUG" />
-    <logger name="akka" level="DEBUG" />
-
-    <root level="WARN">
+    <root level="DEBUG">
         <appender-ref ref="async-stdout" />
     </root>
-
 </configuration>

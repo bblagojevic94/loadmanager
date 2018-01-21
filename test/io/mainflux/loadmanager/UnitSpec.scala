@@ -1,5 +1,6 @@
 package io.mainflux.loadmanager
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 
-abstract class UnitSpec extends FlatSpec with Matchers {}
+trait UnitSpec extends FlatSpecLike with Matchers with MockitoSugar with BeforeAndAfterAll {}

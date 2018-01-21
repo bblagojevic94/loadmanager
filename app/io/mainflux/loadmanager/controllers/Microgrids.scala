@@ -26,7 +26,8 @@ final class Microgrids @Inject()(
           microgridRepository
             .save(body.data.toDomain)
             .map { mg =>
-              Created(Json.toJson(MicrogridResponse.fromDomain(mg))).as(ContentType)
+              val body = Json.toJson(MicrogridResponse.fromDomain(mg))
+              Created(body).as(ContentType)
           }
       )
   }
@@ -44,8 +45,8 @@ final class Microgrids @Inject()(
 
   def retrieveAll: Action[AnyContent] = Action.async {
     microgridRepository.retrieveAll.map { entities =>
-      val body = MicrogridCollectionResponse.fromDomain(entities)
-      Ok(Json.toJson(body)).as(ContentType)
+      val body = Json.toJson(MicrogridCollectionResponse.fromDomain(entities))
+      Ok(body).as(ContentType)
     }
   }
 

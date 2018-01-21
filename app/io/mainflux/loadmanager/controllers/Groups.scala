@@ -26,7 +26,8 @@ final class Groups @Inject()(
           groupRepository
             .save(body.data.toDomain)
             .map { group =>
-              Created(Json.toJson(GroupResponse.fromDomain(group))).as(ContentType)
+              val body = Json.toJson(GroupResponse.fromDomain(group))
+              Created(body).as(ContentType)
           }
       )
   }
@@ -34,7 +35,8 @@ final class Groups @Inject()(
   def retrieveAll: Action[AnyContent] = Action.async {
     groupRepository.retrieveAll
       .map { groups =>
-        Ok(Json.toJson(GroupCollectionResponse.fromDomain(groups))).as(ContentType)
+        val body = Json.toJson(GroupCollectionResponse.fromDomain(groups))
+        Ok(body).as(ContentType)
       }
   }
 
@@ -63,8 +65,8 @@ final class Groups @Inject()(
       .retrieveOne(groupId)
       .flatMap {
         case Some(group) =>
-          val body = MicrogridIdentifiers.fromDomain(group.microgrids)
-          Future.successful(Ok(Json.toJson(body)).as(ContentType))
+          val body = Json.toJson(MicrogridIdentifiers.fromDomain(group.microgrids))
+          Future.successful(Ok(body).as(ContentType))
         case _ => Future.failed(EntityNotFound(s"Group with id $groupId does not exist."))
       }
   }

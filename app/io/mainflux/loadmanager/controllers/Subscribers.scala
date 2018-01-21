@@ -23,9 +23,12 @@ final class Subscribers @Inject()(
       .fold(
         errors => createErrorResponse(errors),
         body =>
-          subscriberRepository.save(body.data.toDomain).map { savedSubscriber =>
-            Created(Json.toJson(SubscriberResponse.fromDomain(savedSubscriber))).as(ContentType)
-        }
+          subscriberRepository
+            .save(body.data.toDomain)
+            .map { sub =>
+              val body = Json.toJson(SubscriberResponse.fromDomain(sub))
+              Created(body).as(ContentType)
+          }
       )
   }
 
@@ -91,13 +94,15 @@ final class Subscribers @Inject()(
         .fold(
           errors => createErrorResponse(errors),
           body =>
-            subscriberRepository.retrieveOne(subscriberId).flatMap {
-              case Some(subscriber) =>
-                val groupIds = body.toDomain.intersect(subscriber.groups)
-                subscriberRepository.unsubscribe(subscriberId, groupIds).map(_ => NoContent)
-              case _ =>
-                Future.failed(EntityNotFound(s"Subscriber with id $subscriberId does not exist."))
-          }
+            subscriberRepository
+              .retrieveOne(subscriberId)
+              .flatMap {
+                case Some(subscriber) =>
+                  val groupIds = body.toDomain.intersect(subscriber.groups)
+                  subscriberRepository.unsubscribe(subscriberId, groupIds).map(_ => NoContent)
+                case _ =>
+                  Future.failed(EntityNotFound(s"Subscriber with id $subscriberId does not exist."))
+            }
         )
   }
 
