@@ -3,7 +3,6 @@ package io.mainflux.loadmanager.engine
 import javax.inject.{Inject, Named}
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props, Timers}
-import com.google.common.annotations.VisibleForTesting
 import io.mainflux.loadmanager.engine.LoadRetriever.{LoadUpdated, UpdateLoad}
 import io.mainflux.loadmanager.engine.ReportSender.Report
 
@@ -11,6 +10,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 final class ReportGenerator @Inject()(@Named("report-sender") reportSender: ActorRef,
+                                      clientProvider: ClientProvider,
                                       microgridRepository: MicrogridRepository)
     extends Actor
     with ActorLogging
@@ -36,7 +36,7 @@ final class ReportGenerator @Inject()(@Named("report-sender") reportSender: Acto
       reportCurrent(loads)
       askForLoadUpdates()
     case update @ LoadUpdated(grid, load, time) =>
-      log.debug("{} {} for grid {} at {}", RetrievedLoad, load, grid, time)
+      log.debug("Retrieved load {} for grid {} at {}", load, grid, time)
 
       val updatedLoads = loads.updated(grid, update)
 
@@ -49,11 +49,11 @@ final class ReportGenerator @Inject()(@Named("report-sender") reportSender: Acto
 
       context.child(name) match {
         case Some(actor) => actor
-        case None        => context.actorOf(LoadRetriever.props(grid), name)
+        case None        => context.actorOf(LoadRetriever.props(clientProvider, grid), name)
       }
     }
 
-    log.debug(AskingForUpdates)
+    log.debug("Asking for load updates...")
 
     microgridRepository.retrieveAll.foreach {
       _.foreach(getOrCreateRetriever(_) ! UpdateLoad)
@@ -68,9 +68,8 @@ object ReportGenerator {
   private[engine] case object InitialTick
   private[engine] case object Tick
 
-  @VisibleForTesting private[engine] val AskingForUpdates = "Asking for load updates..."
-  @VisibleForTesting private[engine] val RetrievedLoad    = "Retrieved load"
-
-  def props(reportSender: ActorRef, microgridRepository: MicrogridRepository): Props =
-    Props(new ReportGenerator(reportSender, microgridRepository))
+  def props(reportSender: ActorRef,
+            clientProvider: ClientProvider,
+            microgridRepository: MicrogridRepository): Props =
+    Props(new ReportGenerator(reportSender, clientProvider, microgridRepository))
 }

@@ -3,7 +3,7 @@ package io.mainflux.loadmanager.hateoas
 import java.time.LocalDateTime
 
 import io.mainflux.loadmanager.UnitSpec
-import io.mainflux.loadmanager.engine.{Microgrid, PlatformType}
+import io.mainflux.loadmanager.engine.{Microgrid, Platform}
 
 final class MicrogridSpec extends UnitSpec {
   "Microgrid entity" should "be created from valid request" in {
@@ -12,7 +12,7 @@ final class MicrogridSpec extends UnitSpec {
 
     request.data.toDomain should have(
       'url (attributes.url),
-      'platform (PlatformType.OSGP),
+      'platform (Platform.OSGP),
       'organisationId (attributes.organisationId)
     )
   }
@@ -75,5 +75,5 @@ final class MicrogridSpec extends UnitSpec {
   }
 
   private def microgrid(id: Long) =
-    Microgrid(Some(id), s"test-url-$id", PlatformType.OSGP, s"org-$id", LocalDateTime.now())
+    Microgrid(Some(id), s"test-url-$id", Platform.OSGP, s"org-$id", LocalDateTime.now())
 }

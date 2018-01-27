@@ -4,6 +4,6 @@ import java.time.LocalDateTime
 
 final case class Microgrid(id: Option[Long],
                            url: String,
-                           platform: PlatformType,
+                           platform: Platform,
                            organisationId: String,
                            createdAt: LocalDateTime)

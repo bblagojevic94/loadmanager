@@ -1,5 +1,5 @@
 package io.mainflux.loadmanager.engine;
 
-public enum PlatformType {
+public enum Platform {
     OSGP, MAINFLUX
 }

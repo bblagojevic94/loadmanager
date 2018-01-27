@@ -2,7 +2,7 @@ package io.mainflux.loadmanager.controllers
 
 import java.time.LocalDateTime
 
-import io.mainflux.loadmanager.engine.{EntityNotFound, Microgrid, MicrogridRepository, PlatformType}
+import io.mainflux.loadmanager.engine.{EntityNotFound, Microgrid, MicrogridRepository, Platform}
 import io.mainflux.loadmanager.hateoas._
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
@@ -114,7 +114,7 @@ final class MicrogridsSpec extends ControllerSpec {
     val underTest = new Microgrids(repository, cc, eh)
 
     def makeMicrogrid(id: Long) =
-      Microgrid(Some(id), s"test-url-$id", PlatformType.OSGP, s"org-$id", LocalDateTime.now())
+      Microgrid(Some(id), s"test-url-$id", Platform.OSGP, s"org-$id", LocalDateTime.now())
 
     val id        = 1L
     val microgrid = makeMicrogrid(id)

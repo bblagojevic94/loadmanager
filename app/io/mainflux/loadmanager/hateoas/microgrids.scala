@@ -3,7 +3,7 @@ package io.mainflux.loadmanager.hateoas
 import java.time.LocalDateTime
 
 import io.mainflux.loadmanager.controllers.routes
-import io.mainflux.loadmanager.engine.{Microgrid, PlatformType}
+import io.mainflux.loadmanager.engine.{Microgrid, Platform}
 
 final case class MicrogridCollectionResponse(data: Seq[MicrogridResponseData])
 
@@ -37,7 +37,7 @@ final case class MicrogridRequestData(`type`: String, attributes: MicrogridAttri
   def toDomain: Microgrid =
     Microgrid(None,
               attributes.url,
-              PlatformType.valueOf(attributes.platformType.toUpperCase),
+              Platform.valueOf(attributes.platformType.toUpperCase),
               attributes.organisationId,
               LocalDateTime.now())
 }

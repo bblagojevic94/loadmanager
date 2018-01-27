@@ -3,7 +3,7 @@ package io.mainflux.loadmanager.postgres
 import java.sql.Timestamp
 import java.time.LocalDateTime
 
-import io.mainflux.loadmanager.engine.{GroupInfo, Microgrid, PlatformType, SubscriberInfo}
+import io.mainflux.loadmanager.engine.{GroupInfo, Microgrid, Platform, SubscriberInfo}
 import slick.ast.BaseTypedType
 import slick.jdbc.JdbcType
 import slick.jdbc.PostgresProfile.api._
@@ -12,8 +12,8 @@ trait DatabaseSchema {
   implicit val dtm: JdbcType[LocalDateTime] with BaseTypedType[LocalDateTime] =
     MappedColumnType.base[LocalDateTime, Timestamp](Timestamp.valueOf, _.toLocalDateTime)
 
-  implicit val ptm: JdbcType[PlatformType] with BaseTypedType[PlatformType] =
-    MappedColumnType.base[PlatformType, String](_.name, PlatformType.valueOf)
+  implicit val ptm: JdbcType[Platform] with BaseTypedType[Platform] =
+    MappedColumnType.base[Platform, String](_.name, Platform.valueOf)
 
   val microgrids       = TableQuery[Microgrids]
   val groups           = TableQuery[Groups]
@@ -29,7 +29,7 @@ trait DatabaseSchema {
 
     def url = column[String]("url")
 
-    def platform = column[PlatformType]("platform")
+    def platform = column[Platform]("platform")
 
     def organisationId = column[String]("organisation_id")
 
