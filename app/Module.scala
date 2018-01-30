@@ -9,7 +9,7 @@ final class Module extends AbstractModule with AkkaGuiceSupport {
     bind(classOf[GroupRepository]).to(classOf[PgGroupRepository])
     bind(classOf[SubscriberRepository]).to(classOf[PgSubscriberRepository])
 
-    bindActor[ReportSender]("report-sender")
-    bindActor[ReportGenerator]("report-generator")
+    bindActor[ReportBuilder]("report-builder")
+    bindActor[ReportCollector]("report-collector")
   }
 }

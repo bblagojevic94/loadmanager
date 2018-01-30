@@ -1,12 +1,13 @@
 package io.mainflux.loadmanager.engine
 
+import java.time.{Clock, LocalDateTime}
+
 import akka.actor.{Actor, ActorLogging, Props}
-import akka.http.scaladsl.model.DateTime
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
-final class LoadRetriever(provider: ClientProvider, microgrid: Microgrid)
+final class LoadRetriever(microgrid: Microgrid, provider: ClientProvider, clock: Clock)
     extends Actor
     with ActorLogging {
   import LoadRetriever._
@@ -20,7 +21,7 @@ final class LoadRetriever(provider: ClientProvider, microgrid: Microgrid)
       log.debug("Retrieving load for {}", microgrid.id.getOrElse(0))
       platformClient.loadOf(microgrid).onComplete {
         case Success(load) =>
-          context.parent ! LoadUpdated(microgrid.id.getOrElse(0), load, DateTime.now)
+          context.parent ! LoadUpdated(microgrid.id.getOrElse(0), load, LocalDateTime.now(clock))
         case Failure(_) =>
           log.error("Unable to retrieve load for {}", microgrid.id.getOrElse(0))
       }
@@ -29,8 +30,10 @@ final class LoadRetriever(provider: ClientProvider, microgrid: Microgrid)
 
 object LoadRetriever {
   private[engine] case object UpdateLoad
-  private[engine] final case class LoadUpdated(grid: Long, load: Double, time: DateTime)
+  private[engine] final case class LoadUpdated(grid: Long, load: Double, time: LocalDateTime)
 
-  def props(provider: ClientProvider, microgrid: Microgrid): Props =
-    Props(new LoadRetriever(provider, microgrid))
+  def props(microgrid: Microgrid,
+            provider: ClientProvider,
+            clock: Clock = Clock.systemUTC()): Props =
+    Props(new LoadRetriever(microgrid, provider, clock))
 }

@@ -3,22 +3,21 @@ package io.mainflux.loadmanager.engine
 import javax.inject.{Inject, Named}
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props, Timers}
+import akka.pattern.pipe
 import io.mainflux.loadmanager.engine.LoadRetriever.{LoadUpdated, UpdateLoad}
-import io.mainflux.loadmanager.engine.ReportSender.Report
+import io.mainflux.loadmanager.engine.ReportBuilder.BuildReport
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-final class ReportGenerator @Inject()(@Named("report-sender") reportSender: ActorRef,
+final class ReportCollector @Inject()(@Named("report-builder") reportBuilder: ActorRef,
                                       clientProvider: ClientProvider,
                                       microgridRepository: MicrogridRepository)
     extends Actor
     with ActorLogging
     with Timers {
 
-  import ReportGenerator._
-
-  implicit val ec: ExecutionContext = context.dispatcher
+  import ReportCollector._
+  import context.dispatcher
 
   timers.startSingleTimer(TickKey, InitialTick, 1.minute)
 
@@ -37,33 +36,29 @@ final class ReportGenerator @Inject()(@Named("report-sender") reportSender: Acto
       askForLoadUpdates()
     case update @ LoadUpdated(grid, load, time) =>
       log.debug("Retrieved load {} for grid {} at {}", load, grid, time)
-
       val updatedLoads = loads.updated(grid, update)
-
       context.become(initialized(updatedLoads))
+    case grids: Seq[Microgrid] => grids.foreach(retrieveLoad)
   }
 
-  private def askForLoadUpdates(): Unit = {
-    def getOrCreateRetriever(grid: Microgrid) = {
-      val name = s"${grid.organisationId}-${grid.id.getOrElse(0)}"
+  private def askForLoadUpdates(): Unit = microgridRepository.retrieveAll.pipeTo(self)
 
-      context.child(name) match {
-        case Some(actor) => actor
-        case None        => context.actorOf(LoadRetriever.props(clientProvider, grid), name)
-      }
+  private def retrieveLoad(grid: Microgrid): Unit = {
+    val name = s"${grid.organisationId}-${grid.id.getOrElse(0)}"
+
+    val retriever = context.child(name) match {
+      case Some(actor) => actor
+      case None        => context.actorOf(LoadRetriever.props(grid, clientProvider), name)
     }
 
-    log.debug("Asking for load updates...")
-
-    microgridRepository.retrieveAll.foreach {
-      _.foreach(getOrCreateRetriever(_) ! UpdateLoad)
-    }
+    retriever ! UpdateLoad
   }
 
-  private def reportCurrent(loads: Map[Long, LoadUpdated]): Unit = reportSender ! Report(loads)
+  private def reportCurrent(loads: Map[Long, LoadUpdated]): Unit =
+    reportBuilder ! BuildReport(loads.values.toSeq)
 }
 
-object ReportGenerator {
+object ReportCollector {
   private case object TickKey
   private[engine] case object InitialTick
   private[engine] case object Tick
@@ -71,5 +66,5 @@ object ReportGenerator {
   def props(reportSender: ActorRef,
             clientProvider: ClientProvider,
             microgridRepository: MicrogridRepository): Props =
-    Props(new ReportGenerator(reportSender, clientProvider, microgridRepository))
+    Props(new ReportCollector(reportSender, clientProvider, microgridRepository))
 }

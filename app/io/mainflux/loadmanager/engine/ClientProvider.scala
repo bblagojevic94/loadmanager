@@ -1,9 +1,5 @@
 package io.mainflux.loadmanager.engine
 
 class ClientProvider {
-  def clientFor(platformType: Platform): PlatformClient =
-    platformType match {
-      case Platform.OSGP     => new OSGP()
-      case Platform.MAINFLUX => new Mainflux()
-    }
+  def clientFor(platform: Platform): PlatformClient = platform.client()
 }

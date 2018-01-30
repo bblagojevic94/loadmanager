@@ -1,28 +1,29 @@
 package io.mainflux.loadmanager.engine
 
+import java.time.LocalDateTime
+
 import akka.actor.{ActorRef, ActorSystem}
-import akka.http.scaladsl.model.DateTime
 import akka.testkit.{EventFilter, TestKit, TestProbe}
 import com.typesafe.config.ConfigFactory
 import io.mainflux.loadmanager.UnitSpec
 import io.mainflux.loadmanager.engine.LoadRetriever.LoadUpdated
-import io.mainflux.loadmanager.engine.ReportGenerator.{InitialTick, Tick}
-import io.mainflux.loadmanager.engine.ReportSender.Report
+import io.mainflux.loadmanager.engine.ReportCollector.{InitialTick, Tick}
+import io.mainflux.loadmanager.engine.ReportBuilder.BuildReport
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-final class ReportGeneratorSpec
-    extends TestKit(ActorSystem("test-system", ReportGeneratorSpec.Config))
+final class ReportCollectorSpec
+    extends TestKit(ActorSystem("test-system", ReportCollectorSpec.Config))
     with UnitSpec {
 
-  "Report generator" should "initially ask for load updates" in {
+  "Report collector" should "initially ask for load updates" in {
     val probe      = TestProbe()
     val repository = mockedRepository()
     val provider   = mockedProvider()
-    val generator  = system.actorOf(ReportGenerator.props(probe.ref, provider, repository))
+    val generator  = system.actorOf(ReportCollector.props(probe.ref, provider, repository))
 
     initialize(generator)
 
@@ -35,7 +36,7 @@ final class ReportGeneratorSpec
     val probe      = TestProbe()
     val repository = mockedRepository()
     val provider   = mockedProvider()
-    val generator  = system.actorOf(ReportGenerator.props(probe.ref, provider, repository))
+    val generator  = system.actorOf(ReportCollector.props(probe.ref, provider, repository))
 
     initialize(generator)
     generator ! Tick
@@ -46,11 +47,11 @@ final class ReportGeneratorSpec
   }
 
   it should "store update information locally" in {
-    val update     = LoadUpdated(1, 2.0, DateTime.now)
+    val update     = LoadUpdated(1, 2.0, LocalDateTime.now)
     val probe      = TestProbe()
     val repository = mockedRepository()
     val provider   = mockedProvider()
-    val generator  = system.actorOf(ReportGenerator.props(probe.ref, provider, repository))
+    val generator  = system.actorOf(ReportCollector.props(probe.ref, provider, repository))
 
     initialize(generator)
 
@@ -59,16 +60,16 @@ final class ReportGeneratorSpec
     }
   }
 
-  it should "report current loads periodically" in {
+  it should "trigger report sending periodically" in {
     val probe      = TestProbe()
     val repository = mockedRepository()
     val provider   = mockedProvider()
-    val generator  = system.actorOf(ReportGenerator.props(probe.ref, provider, repository))
+    val generator  = system.actorOf(ReportCollector.props(probe.ref, provider, repository))
 
     initialize(generator)
     generator ! Tick
 
-    probe.expectMsg(5.seconds, Report(Map.empty))
+    probe.expectMsg(5.seconds, BuildReport(Seq()))
   }
 
   override protected def afterAll(): Unit = TestKit.shutdownActorSystem(system)
@@ -90,10 +91,14 @@ final class ReportGeneratorSpec
   }
 }
 
-object ReportGeneratorSpec {
-  private val Config =
-    ConfigFactory.parseString("""
+object ReportCollectorSpec {
+  private val Config = {
+    val cfg =
+      """
         |akka.loggers = ["akka.testkit.TestEventListener"]
         |akka.loglevel = "DEBUG"
-      """.stripMargin)
+      """.stripMargin
+
+    ConfigFactory.parseString(cfg)
+  }
 }

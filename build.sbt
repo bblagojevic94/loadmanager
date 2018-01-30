@@ -21,7 +21,7 @@ lazy val commonSettings = Seq(
     "-Ywarn-unused-import"
   ),
   scalaVersion := "2.12.2",
-  version := "0.2.0"
+  version := "0.3.0"
 )
 
 lazy val root = (project in file("."))
@@ -41,13 +41,16 @@ lazy val root = (project in file("."))
         slick,
         slickEvolutions,
         swagger,
-        webJarsPlay
+        webJarsPlay,
+        ws
       )
 
-      val testing = Seq(akkaTestKit, mockito, scalaTest).map(_ % Test)
+      val testing = Seq(akkaTestKit, mockito, scalaTest, wiremock)
 
-      core ++ testing
+      core ++ testing.map(_ % Test)
     },
+
+    dependencyOverrides ++= jetty.map(_ % Test),
 
     wartremoverExcluded := {
       val root = crossTarget.value

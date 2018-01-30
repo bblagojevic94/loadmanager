@@ -33,7 +33,7 @@
     <logger name="application" level="INFO"/>
     <logger name="play" level="INFO"/>
 
-    <root level="ERROR">
+    <root level="WARN">
         <appender-ref ref="async-stdout"/>
     </root>
 </configuration>
